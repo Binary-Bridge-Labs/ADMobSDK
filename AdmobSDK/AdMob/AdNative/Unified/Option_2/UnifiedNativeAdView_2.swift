@@ -10,19 +10,6 @@ import UIKit
 import GoogleMobileAds
 import SkeletonView
 
-protocol NativeAdProtocol {
-    var adUnitID: String? {get set}
-    
-    func bindingData(nativeAd: GADNativeAd)
-    func getGADView() -> GADNativeAdView
-}
-
-extension NativeAdProtocol {
-    mutating func updateId(value: String) {
-        adUnitID = value
-    }
-}
-
 class UnifiedNativeAdView_2: GADNativeAdView {
     
     @IBOutlet weak var lblAds: UILabel!
