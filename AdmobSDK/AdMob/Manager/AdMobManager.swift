@@ -42,7 +42,7 @@ public enum ThemeStyleAds {
     case custom(backgroundColor: UIColor, titleColor: UIColor, vertiserColor: UIColor, contenColor: UIColor, actionColor: UIColor, backgroundAction: [UIColor])
     case setBackground(backgroundColor: UIColor)
     
-    var colors: (backgroundColor: UIColor, titleColor: UIColor, vertiserColor: UIColor, contenColor: UIColor, actionColor: UIColor, backgroundAction: [UIColor]) {
+    public var colors: (backgroundColor: UIColor, titleColor: UIColor, vertiserColor: UIColor, contenColor: UIColor, actionColor: UIColor, backgroundAction: [UIColor]) {
         switch self {
         case .origin:
             return (UIColor(hex: 0xFFFFFF), UIColor(hex: 0x0303B3), UIColor(hex: 0x001868), UIColor(hex: 0x666666), UIColor(hex: 0xFFFFFF), [UIColor(hex: 0x007AFF)])
@@ -63,6 +63,9 @@ open class AdMobManager: NSObject {
     public var showAdRewardCount = 0
     public var listAd: NSMutableDictionary = NSMutableDictionary()
     public var listLoader: NSMutableDictionary = NSMutableDictionary()
+    
+    public var listNativeAd: [String: NativeAdProtocol] = [:]
+    public var listNativeLoader: [String: GADAdLoader] = [:]
     
     //    MARK: - Type Theme color
     public var adsNativeColor: ThemeStyleAds = .origin
@@ -96,7 +99,7 @@ open class AdMobManager: NSObject {
     public var blockFullScreenAdClick      : VoidBlockAds?
     public var blockCompletionHandeler     : BoolBlockAds?
     public var blockNativeFailed            : StringBlockAds?
-    public var blockLoadNativeSuccess      : BoolBlockAds?
+    public var blockLoadNativeSuccess      : StringBlockNativeAds?
     public var blockBannerFailed      : ((String) -> Void)?
     public var blockLoadBannerSuccess: ((Bool) -> Void)?
     public var blockBannerClick      : StringBlockAds?

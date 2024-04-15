@@ -10,6 +10,7 @@ import UIKit
 
 public typealias VoidBlockAds = () -> Void
 public typealias BoolBlockAds = (Bool) -> Void
+public typealias StringBlockNativeAds = (String?, NativeAdProtocol?) -> Void
 public typealias StringBlockAds = (String) -> Void
 public typealias IntBlockAds = (Int) -> Void
 

@@ -169,7 +169,7 @@ extension ADManager {
         }
         BBLLogging.d("ADMANAGER: REWARD \(adId)")
         guard isShowReward,
-                id.isEnableAd else {
+              id.isEnableAd else {
             BBLLogging.d("ADMANAGER: REWARD REMOTE CLOSE")
             completion?(.closed)
             return
@@ -204,9 +204,9 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatBanner
         }
         BBLLogging.d("ADMANAGER: BANNER  \(adId)")
-        guard isShowBanner, 
+        guard isShowBanner,
                 id.isEnableAd,
-                let viewController = UIApplication.shared.delegate?.getRootViewController() else {
+              let viewController = UIApplication.shared.delegate?.getRootViewController() else {
             completion(false)
             BBLLogging.d("ADMANAGER: BANNER REMOTE CLOSE")
             return
@@ -255,9 +255,9 @@ extension ADManager {
     }
     
     public func loadCollapsibleBannerAdaptive(_ id: AdConfigId,
-                                       viewBanner: UIView,
-                                       isCollapsible: Bool = false,
-                                       completion: @escaping ((_ success: Bool) -> Void)) {
+                                              viewBanner: UIView,
+                                              isCollapsible: Bool = false,
+                                              completion: @escaping ((_ success: Bool) -> Void)) {
         var adId = id.adUnitId
         if isTestMode {
             adId = SampleAdUnitID.adFormatCollapsibleBanner
@@ -286,30 +286,65 @@ extension ADManager {
                                                            view: viewBanner, isCollapsibleBanner: isCollapsible)
     }
     
-    public func loadNative(_ id: AdConfigId,
-                    to view: UIView,
-                    nativeAdType: NativeAdType = .smallMedia,
-                    _ completion: @escaping ((_ success: Bool) -> Void)) {
+    public func preLoadNative(_ id: AdConfigId,
+                              refreshAd: Bool = false,
+                              nativeAdType: NativeAdType = .smallMedia) {
         var adId = id.adUnitId
         if isTestMode {
             adId = SampleAdUnitID.adFormatNativeAdvancedVideo
         }
         guard isShowNative,
-              id.isEnableAd,
-                let viewController = UIApplication.shared.delegate?.getRootViewController() else {
-            completion(false)
+              id.isEnableAd else {
+            return
+        }
+        AdMobManager.shared.preloadAdNative(unitId: adId,
+                                            refreshAd: refreshAd,
+                                            type: nativeAdType,
+                                            ratio: .any)
+    }
+    
+    public func loadNative(_ id: AdConfigId,
+                           to view: UIView,
+                           refreshAd: Bool = false,
+                           nativeAdType: NativeAdType = .smallMedia,
+                           _ completion: @escaping ((_ adId: String,
+                                                     _ success: Bool,
+                                                     _ nativeAdView: NativeAdProtocol?) -> Void)) {
+        var adId = id.adUnitId
+        if isTestMode {
+            adId = SampleAdUnitID.adFormatNativeAdvancedVideo
+        }
+        guard isShowNative,
+              id.isEnableAd else {
+            completion(id.adId, false, nil)
             return
         }
         AdMobManager.shared.blockNativeFailed = { adId in
             BBLLogging.d("ADMANAGER: NATIVE LOAD FAILED: \(adId)")
-            completion(false)
+            completion(adId, false, nil)
         }
-        AdMobManager.shared.blockLoadNativeSuccess = { adId in
-            BBLLogging.d("ADMANAGER: NATIVE LOAD SUCCESS: \(adId)")
-            completion(true)
+        AdMobManager.shared.blockLoadNativeSuccess = { adId, nativeAdView in
+            BBLLogging.d("ADMANAGER: NATIVE LOAD SUCCESS: \(adId ?? "")")
+            if adId?.elementsEqual(id.adId) == true {
+                if let adView = nativeAdView?.getGADView() {
+                    adView.translatesAutoresizingMaskIntoConstraints = false
+                    view.addSubview(adView)
+                    NSLayoutConstraint.activate([
+                        adView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
+                        adView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+                        adView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
+                        adView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0)
+                    
+                    ])
+                }
+                completion(adId ?? "", true, nativeAdView)
+            }
         }
-        AdMobManager.shared.addAdNative(unitId: adId, rootVC: viewController, views: [view],
-                                        type: nativeAdType, ratio: .any)
+        AdMobManager.shared.addAdNative(unitId: adId,
+                                        view: view,
+                                        refreshAd: refreshAd,
+                                        type: nativeAdType,
+                                        ratio: .any)
     }
     
 }

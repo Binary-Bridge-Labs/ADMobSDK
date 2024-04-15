@@ -10,7 +10,7 @@ import UIKit
 
 extension UIApplication {
     
-    class func getTopViewController(base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+    public class func getTopViewController(base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
 
         if let nav = base as? UINavigationController {
             return getTopViewController(base: nav.visibleViewController)
@@ -24,15 +24,15 @@ extension UIApplication {
         return base
     }
     
-    static var release: String {
+    public static var release: String {
         return Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String? ?? "x.x"
     }
     
-    static var build: String {
+    public static var build: String {
         return Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as! String? ?? "x"
     }
     
-    static var versionApp: String {
+    public static var versionApp: String {
         return "\(release)(\(build))"
     }
 }
