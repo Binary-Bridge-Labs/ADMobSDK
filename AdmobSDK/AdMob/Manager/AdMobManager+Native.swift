@@ -109,7 +109,7 @@ extension AdMobManager {
             return
         }
         if refreshAd {
-            removeAd(unitId: unitId.rawValue)
+            removeNativeAd(unitId: unitId.rawValue)
         }
         createAdNativeView(unitId: unitId, type: type)
         loadAdNative(unitId: unitId, rootVC: rootVC, numberOfAds: 1, ratio: ratio)
@@ -126,7 +126,7 @@ extension AdMobManager {
             return
         }
         if refreshAd {
-            removeAd(unitId: unitId.rawValue)
+            removeNativeAd(unitId: unitId.rawValue)
             createAdNativeView(unitId: unitId, type: type)
             loadAdNative(unitId: unitId, rootVC: rootVC, numberOfAds: 1, ratio: ratio)
         } else {
@@ -175,8 +175,8 @@ extension AdMobManager: GADAdLoaderDelegate {
     
     public func adLoader(_ adLoader: GADAdLoader, didFailToReceiveAdWithError error: Error) {
         print("Native load error: \(error)")
+        self.removeNativeAd(unitId: adLoader.adUnitID)
         self.blockNativeFailed?(adLoader.adUnitID)
-        self.removeAd(unitId: adLoader.adUnitID)
     }
     
     public func adLoaderDidFinishLoading(_ adLoader: GADAdLoader) {
