@@ -12,14 +12,21 @@ import FirebaseAnalytics
 
 public protocol NativeAdProtocol {
     var adUnitID: String? {get set}
+    var gadNativeAd: GADNativeAd? {get set}
     
     func bindingData(nativeAd: GADNativeAd)
+    
     func getGADView() -> GADNativeAdView
 }
 
 extension NativeAdProtocol {
     mutating func updateId(value: String) {
         adUnitID = value
+    }
+    
+    mutating func reloadAdContent() {
+        guard let adNative = gadNativeAd else { return }
+        bindingData(nativeAd: adNative)
     }
 }
 
@@ -101,15 +108,19 @@ extension AdMobManager {
                                   refreshAd: Bool = false,
                                   type: NativeAdType = .smallMedia,
                                   ratio: GADMediaAspectRatio = .portrait) {
+        if let loader = getNativeAdLoader(unitId: unitId),
+            loader.isLoading {
+            return
+        }
+        if refreshAd {
+            removeNativeAd(unitId: unitId.rawValue)
+        }
         if getNativeAdLoader(unitId: unitId) != nil {
             return
         }
         guard let rootVC = UIApplication.getTopViewController() else {
             blockNativeFailed?(unitId.rawValue)
             return
-        }
-        if refreshAd {
-            removeNativeAd(unitId: unitId.rawValue)
         }
         createAdNativeView(unitId: unitId, type: type)
         loadAdNative(unitId: unitId, rootVC: rootVC, numberOfAds: 1, ratio: ratio)

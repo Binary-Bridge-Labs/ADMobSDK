@@ -20,6 +20,7 @@ class MediumNativeAdView: GADNativeAdView, NativeAdProtocol {
     
     let (viewBackgroundColor, titleColor, vertiserColor, contenColor, actionColor, backgroundAction) = AdMobManager.shared.adsNativeColor.colors
     var adUnitID: String?
+    var gadNativeAd: GADNativeAd?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -33,6 +34,7 @@ class MediumNativeAdView: GADNativeAdView, NativeAdProtocol {
     }
     
     func bindingData(nativeAd: GADNativeAd) {
+        gadNativeAd = nativeAd
         hideSkeleton()
         stopSkeletonAnimation()
         (headlineView as? UILabel)?.text = nativeAd.headline

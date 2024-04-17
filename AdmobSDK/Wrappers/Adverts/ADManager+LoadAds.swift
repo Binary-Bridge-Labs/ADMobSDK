@@ -323,9 +323,9 @@ extension ADManager {
             BBLLogging.d("ADMANAGER: NATIVE LOAD FAILED: \(adId)")
             completion(adId, false, nil)
         }
-        AdMobManager.shared.blockLoadNativeSuccess = { adId, nativeAdView in
-            BBLLogging.d("ADMANAGER: NATIVE LOAD SUCCESS: \(adId ?? "")")
-            if adId?.elementsEqual(id.adId) == true {
+        AdMobManager.shared.blockLoadNativeSuccess = { idRequested, nativeAdView in
+            BBLLogging.d("ADMANAGER: NATIVE LOAD SUCCESS: \(idRequested ?? "")")
+            if idRequested?.elementsEqual(adId.rawValue) == true {
                 if let adView = nativeAdView?.getGADView() {
                     adView.translatesAutoresizingMaskIntoConstraints = false
                     view.addSubview(adView)
@@ -337,7 +337,7 @@ extension ADManager {
                     
                     ])
                 }
-                completion(adId ?? "", true, nativeAdView)
+                completion(idRequested ?? "", true, nativeAdView)
             }
         }
         AdMobManager.shared.addAdNative(unitId: adId,
