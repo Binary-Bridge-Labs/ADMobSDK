@@ -34,7 +34,7 @@ extension UIApplicationDelegate {
 // MARK: - Load and reload Ads
 extension ADManager {
     
-    fileprivate var isTestMode: Bool { // Setting cho chế độ testmode
+    public var isTestMode: Bool { // Setting cho chế độ testmode
         return showState?.isTestMode ?? false
     }
     
@@ -129,6 +129,21 @@ extension ADManager {
         }
     }
     
+    public func preloadInterstitial(_ id: AdConfigId) {
+        var adId = id.adUnitId
+        if isTestMode {
+            adId = SampleAdUnitID.adFormatInterstitialVideo
+        }
+        BBLLogging.d("ADMANAGER: FULL \(adId)")
+        guard isShowFull,
+              id.isEnableAd else {
+            BBLLogging.d("ADMANAGER: FULL REMOTE CLOSE")
+            return
+        }
+        BBLLogging.d("ADMANAGER: FULL Loading")
+        AdMobManager.shared.createAdRewardedIfNeed(unitId: adId)
+    }
+    
     public func loadFull(_ id: AdConfigId, isSplash: Bool = true, _ completion: ((AdvertResult) -> Void)? = nil) {
         var adId = id.adUnitId
         if isTestMode {
@@ -143,14 +158,9 @@ extension ADManager {
         }
         if isShowingAd {
             BBLLogging.d("ADMANAGER: FULL HAS AD SHOWING")
+            completion?(.showed)
             return
         }
-        if (Int(Date().timeIntervalSince1970) - timeShowFull) <= timeRemoteShowFull {
-            BBLLogging.d("ADMANAGER: FULL NOT MATCH TIME")
-            completion?(.closed)
-            return
-        }
-        self.timeShowFull = Int(Date().timeIntervalSince1970)
         self.isShowingAd = true
         BBLLogging.d("ADMANAGER: FULL Loading")
         AdMobManager.shared.showIntertitial(unitId: adId, isSplash: isSplash, blockDidDismiss: { [weak self] in
@@ -160,6 +170,21 @@ extension ADManager {
             completion?(.closed)
             AdMobManager.shared.createAdInterstitialIfNeed(unitId: adId)
         })
+    }
+    
+    public func preLoadReward(_ id: AdConfigId) {
+        var adId = id.adUnitId
+        if isTestMode {
+            adId = SampleAdUnitID.adFormatRewarded
+        }
+        BBLLogging.d("ADMANAGER: REWARD \(adId)")
+        guard isShowReward,
+              id.isEnableAd else {
+            BBLLogging.d("ADMANAGER: REWARD REMOTE CLOSE")
+            return
+        }
+        BBLLogging.d("ADMANAGER: REWARD SHOWED started")
+        AdMobManager.shared.createAdRewardedIfNeed(unitId: adId)
     }
     
     public func loadReward(_ id: AdConfigId, _ completion: ((AdvertResult) -> Void)? = nil) {
@@ -176,14 +201,9 @@ extension ADManager {
         }
         if isShowingAd {
             BBLLogging.d("ADMANAGER: REWARD HAS AD SHOWING")
+            completion?(.showed)
             return
         }
-        if (Int(Date().timeIntervalSince1970) - timeShowReward) <= timeRemoteShowReward {
-            BBLLogging.d("ADMANAGER: REWARD NOT MATCH TIME")
-            completion?(.closed)
-            return
-        }
-        self.timeShowReward = Int(Date().timeIntervalSince1970)
         self.isShowingAd = true
         BBLLogging.d("ADMANAGER: REWARD SHOWED started")
         AdMobManager.shared.showRewarded(unitId: adId) { [weak self] earned in

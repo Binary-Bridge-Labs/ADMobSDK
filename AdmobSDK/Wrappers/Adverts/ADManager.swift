@@ -53,8 +53,6 @@ public class ADManager: NSObject {
     internal var isShowingAd = false // Cờ để check xem đang show quảng cáo hay không. Chỉ cho phép show 1 loại quảng cáo/1 thời điểm
     
     internal var timeShowOpen: Int = 0
-    internal var timeShowFull: Int = 0
-    internal var timeShowReward: Int = 0
     
     internal var showState: AdShowState?
     internal var configTime: AdConfigTime?
