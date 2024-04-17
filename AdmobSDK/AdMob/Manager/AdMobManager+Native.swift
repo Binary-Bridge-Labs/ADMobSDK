@@ -131,7 +131,8 @@ extension AdMobManager {
                               refreshAd: Bool = false,
                               type: NativeAdType = .smallMedia,
                               ratio: GADMediaAspectRatio = .portrait) {
-        if getNativeAdLoader(unitId: unitId) != nil { return }
+        if let loader = getNativeAdLoader(unitId: unitId),
+            loader.isLoading { return }
         guard let rootVC = UIApplication.getTopViewController() else {
             blockNativeFailed?(unitId.rawValue)
             return
@@ -141,7 +142,8 @@ extension AdMobManager {
             createAdNativeView(unitId: unitId, type: type)
             loadAdNative(unitId: unitId, rootVC: rootVC, numberOfAds: 1, ratio: ratio)
         } else {
-            if let nativeAdProtocol = getAdNative(unitId: unitId.rawValue) {
+            if var nativeAdProtocol = getAdNative(unitId: unitId.rawValue) {
+                nativeAdProtocol.reloadAdContent()
                 blockLoadNativeSuccess?(unitId.rawValue, nativeAdProtocol)
             } else {
                 addAdNative(unitId: unitId, view: view, refreshAd: true, type: type, ratio: ratio)
