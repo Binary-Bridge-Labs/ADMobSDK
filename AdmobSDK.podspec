@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "AdmobSDK"
-  spec.version      = "0.0.5"
+  spec.version      = "0.0.7"
   spec.summary      = "A small framework extending from Google-Mobile-Ads-SDK"
 
   spec.description  = <<-DESC
