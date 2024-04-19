@@ -53,12 +53,8 @@ class AdFullScreenLoadingVC: UIViewController {
         
         if adType.isExisted {
             self.stopCheckTimmer()
-            DispatchQueue.main.asyncSafety { [weak self] in
-                if let self = self {
-                    self.showLoadingDotAds(backgroundColor: .white, textLoading: self.textLoading)
-                }
-                adType.presentAd()
-            }
+            showLoadingDotAds(backgroundColor: .white, textLoading: textLoading)
+            adType.presentAd()
             
             AdMobManager.shared.blockFullScreenAdDidDismiss = { [weak self] in
                 AdMobManager.shared.removeAd(unitId: adUnitId.rawValue)
@@ -96,11 +92,7 @@ class AdFullScreenLoadingVC: UIViewController {
             }
 
         } else {
-            DispatchQueue.main.asyncSafety { [weak self] in
-                if let self = self {
-                    self.showLoadingDotAds(backgroundColor: .white, textLoading: self.textLoading)
-                }
-            }
+            showLoadingDotAds(backgroundColor: .white, textLoading: textLoading)
             AdMobManager.shared.blockLoadFullScreenAdSuccess = { [weak self] unitId in
                 guard let _self = self, _self.adUnitId?.rawValue == unitId else {
                     return

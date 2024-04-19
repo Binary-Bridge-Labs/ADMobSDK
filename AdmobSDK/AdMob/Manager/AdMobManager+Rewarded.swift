@@ -80,16 +80,20 @@ extension AdMobManager {
             guard let rootVC = rootVC else { return }
             
             let loadingVC = AdFullScreenLoadingVC.createViewController(unitId: unitId, adType: .reward(id: unitId))
-            rootVC.addChild(loadingVC)
-            rootVC.view.addSubview(loadingVC.view)
             loadingVC.blockDidDismiss = { [weak loadingVC] in
                 loadingVC?.view.removeFromSuperview()
                 loadingVC?.removeFromParent()
                 completion?(self.didEarnReward)
             }
-            loadingVC.view.snp.makeConstraints { make in
-                make.edges.equalToSuperview()
-            }
+            rootVC.addChild(loadingVC)
+            rootVC.view.addSubview(loadingVC.view)
+            NSLayoutConstraint.activate([
+                loadingVC.view.topAnchor.constraint(equalTo: rootVC.view.topAnchor, constant: 0),
+                loadingVC.view.leadingAnchor.constraint(equalTo: rootVC.view.leadingAnchor, constant: 0),
+                loadingVC.view.trailingAnchor.constraint(equalTo: rootVC.view.trailingAnchor, constant: 0),
+                loadingVC.view.bottomAnchor.constraint(equalTo: rootVC.view.bottomAnchor, constant: 0)
+            ])
+            loadingVC.didMove(toParent: rootVC.parent)
         } else {
             Utils.showToast(rewardErrorString, on: UIApplication.getTopViewController()?.view)
             createAdRewardedIfNeed(unitId: unitId)

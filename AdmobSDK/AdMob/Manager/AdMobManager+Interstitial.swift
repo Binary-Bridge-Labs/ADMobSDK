@@ -11,7 +11,7 @@ import FirebaseAnalytics
 
 // MARK: - GADInterstitial
 extension AdMobManager: GADFullScreenContentDelegate {
-
+    
     /// khởi tạo id ads trước khi show
     public func createAdInterstitialIfNeed(unitId: AdUnitID, completion: BoolBlockAds? = nil) {
         if self.getAdInterstitial(unitId: unitId) != nil {
@@ -54,23 +54,24 @@ extension AdMobManager: GADFullScreenContentDelegate {
     
     func getAdInterstitial(unitId: AdUnitID) -> GADInterstitialAd? {
         if let interstitial = listAd.object(forKey: unitId.rawValue) as? GADInterstitialAd {
-             return interstitial
-         }
-         return nil
-     }
+            return interstitial
+        }
+        return nil
+    }
     
     /// show ads Interstitial
     func presentAdInterstitial(unitId: AdUnitID) {
         self.createAdInterstitialIfNeed(unitId: unitId)
         let interstitial = self.getAdInterstitial(unitId: unitId)
         if let topVC =  UIApplication.getTopViewController() {
+            print("topVC: \(String(describing: topVC.self))")
             interstitial?.present(fromRootViewController: topVC)
             AdResumeManager.shared.isShowingAd = true // kiểm tra nếu show inter thì ko show resume
         }
     }
     
     public func showIntertitial(unitId: AdUnitID,
-                                isSplash: Bool = false, 
+                                isSplash: Bool = false,
                                 blockWillDismiss: VoidBlockAds? = nil,
                                 blockDidDismiss: VoidBlockAds? = nil) {
         if isSplash {
@@ -84,7 +85,7 @@ extension AdMobManager: GADFullScreenContentDelegate {
                     blockDidDismiss?()
                 }
             }
-           return
+            return
         }
         
         if AdMobManager.shared.getAdInterstitial(unitId: unitId) != nil {
@@ -97,20 +98,26 @@ extension AdMobManager: GADFullScreenContentDelegate {
                 }
             }
             guard let rootVC = rootVC else { return }
-
+            print("rootVC: \(rootVC)")
             let loadingVC = AdFullScreenLoadingVC.createViewController(unitId: unitId, adType: .interstitial(id: unitId))
-            rootVC.addChild(loadingVC)
-            rootVC.view.addSubview(loadingVC.view)
+            loadingVC.view.translatesAutoresizingMaskIntoConstraints = false
             loadingVC.blockDidDismiss = { [weak loadingVC] in
+                loadingVC?.willMove(toParent: nil)
                 loadingVC?.view.removeFromSuperview()
                 loadingVC?.removeFromParent()
                 self.isSplash = false
                 blockDidDismiss?()
             }
             loadingVC.blockWillDismiss = blockWillDismiss
-            loadingVC.view.snp.makeConstraints { make in
-                make.edges.equalToSuperview()
-            }
+            rootVC.addChild(loadingVC)
+            rootVC.view.addSubview(loadingVC.view)
+            NSLayoutConstraint.activate([
+                loadingVC.view.topAnchor.constraint(equalTo: rootVC.view.topAnchor, constant: 0),
+                loadingVC.view.leadingAnchor.constraint(equalTo: rootVC.view.leadingAnchor, constant: 0),
+                loadingVC.view.trailingAnchor.constraint(equalTo: rootVC.view.trailingAnchor, constant: 0),
+                loadingVC.view.bottomAnchor.constraint(equalTo: rootVC.view.bottomAnchor, constant: 0)
+            ])
+            loadingVC.didMove(toParent: rootVC.parent)
         } else {
             createAdInterstitialIfNeed(unitId: unitId)
             blockWillDismiss?()
@@ -126,9 +133,15 @@ extension AdMobManager: GADFullScreenContentDelegate {
     
     /// Tells the delegate that the ad failed to present full screen content.
     public func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        print("Ad did fail to present full screen content.")
+        print("Ad did fail to present full screen content. \(error)")
         UIApplication.shared.isStatusBarHidden = false
-        self.blockFullScreenAdFailed?("")
+        var id = ""
+        if let adId = (ad as? GADInterstitialAd)?.adUnitID {
+            id = adId
+        } else if let adId = (ad as? GADRewardedAd)?.adUnitID {
+            id = adId
+        }
+        self.blockFullScreenAdFailed?(id)
         AdResumeManager.shared.isShowingAd = false
     }
     
