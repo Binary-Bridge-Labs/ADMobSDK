@@ -12,14 +12,21 @@ import FirebaseAnalytics
 
 public protocol NativeAdProtocol {
     var adUnitID: String? {get set}
+    var gadNativeAd: GADNativeAd? {get set}
     
     func bindingData(nativeAd: GADNativeAd)
+    
     func getGADView() -> GADNativeAdView
 }
 
 extension NativeAdProtocol {
     mutating func updateId(value: String) {
         adUnitID = value
+    }
+    
+    mutating func reloadAdContent() {
+        guard let adNative = gadNativeAd else { return }
+        bindingData(nativeAd: adNative)
     }
 }
 
@@ -101,15 +108,19 @@ extension AdMobManager {
                                   refreshAd: Bool = false,
                                   type: NativeAdType = .smallMedia,
                                   ratio: GADMediaAspectRatio = .portrait) {
+        if let loader = getNativeAdLoader(unitId: unitId),
+            loader.isLoading {
+            return
+        }
+        if refreshAd {
+            removeNativeAd(unitId: unitId.rawValue)
+        }
         if getNativeAdLoader(unitId: unitId) != nil {
             return
         }
         guard let rootVC = UIApplication.getTopViewController() else {
             blockNativeFailed?(unitId.rawValue)
             return
-        }
-        if refreshAd {
-            removeAd(unitId: unitId.rawValue)
         }
         createAdNativeView(unitId: unitId, type: type)
         loadAdNative(unitId: unitId, rootVC: rootVC, numberOfAds: 1, ratio: ratio)
@@ -119,18 +130,20 @@ extension AdMobManager {
                               view: UIView? = nil,
                               refreshAd: Bool = false,
                               type: NativeAdType = .smallMedia,
-                              ratio: GADMediaAspectRatio = .portrait) {
-        if getNativeAdLoader(unitId: unitId) != nil { return }
+                              ratio: GADMediaAspectRatio) {
+        if let loader = getNativeAdLoader(unitId: unitId),
+            loader.isLoading { return }
         guard let rootVC = UIApplication.getTopViewController() else {
             blockNativeFailed?(unitId.rawValue)
             return
         }
         if refreshAd {
-            removeAd(unitId: unitId.rawValue)
+            removeNativeAd(unitId: unitId.rawValue)
             createAdNativeView(unitId: unitId, type: type)
             loadAdNative(unitId: unitId, rootVC: rootVC, numberOfAds: 1, ratio: ratio)
         } else {
-            if let nativeAdProtocol = getAdNative(unitId: unitId.rawValue) {
+            if var nativeAdProtocol = getAdNative(unitId: unitId.rawValue) {
+                nativeAdProtocol.reloadAdContent()
                 blockLoadNativeSuccess?(unitId.rawValue, nativeAdProtocol)
             } else {
                 addAdNative(unitId: unitId, view: view, refreshAd: true, type: type, ratio: ratio)
@@ -138,7 +151,8 @@ extension AdMobManager {
         }
     }
     
-    private func loadAdNative(unitId: AdUnitID, rootVC: UIViewController, numberOfAds: Int, ratio: GADMediaAspectRatio) {
+    private func loadAdNative(unitId: AdUnitID, rootVC: UIViewController,
+                              numberOfAds: Int, ratio: GADMediaAspectRatio) {
         if let loader = getNativeAdLoader(unitId: unitId) {
             loader.delegate = self
             loader.load(GADRequest())
@@ -175,8 +189,8 @@ extension AdMobManager: GADAdLoaderDelegate {
     
     public func adLoader(_ adLoader: GADAdLoader, didFailToReceiveAdWithError error: Error) {
         print("Native load error: \(error)")
+        self.removeNativeAd(unitId: adLoader.adUnitID)
         self.blockNativeFailed?(adLoader.adUnitID)
-        self.removeAd(unitId: adLoader.adUnitID)
     }
     
     public func adLoaderDidFinishLoading(_ adLoader: GADAdLoader) {

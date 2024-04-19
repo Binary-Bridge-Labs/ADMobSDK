@@ -110,6 +110,11 @@ open class AdMobManager: NSObject {
         listLoader.removeObject(forKey: unitId)
     }
     
+    public func removeNativeAd(unitId: String) {
+        listNativeAd.removeValue(forKey: unitId)
+        listNativeLoader.removeValue(forKey: unitId)
+    }
+    
     //    MARK: - Track Ad Revenue
     func trackAdRevenue(value: GADAdValue, unitId: String) {
         Analytics.logEvent("paid_ad_impression_value", parameters: ["adunitid" : unitId, "value" : "\(value.value.doubleValue)"])

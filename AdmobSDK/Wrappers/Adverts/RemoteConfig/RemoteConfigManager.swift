@@ -32,6 +32,14 @@ public enum DefaultRemoteKey: String, KeyRemote {
 public class RemoteConfigManager: NSObject {
     public static let shared = RemoteConfigManager()
     private let remoteConfig = RemoteConfig.remoteConfig()
+    public var devMode = false
+    public var defaultFile: String? = nil {
+        didSet {
+            remoteConfig.setDefaults(fromPlist: defaultFile)
+        }
+    }
+    
+    private let MINIMUM_FETCH_INTERVAL: TimeInterval = 1200 // 1200 seconds
     private let TIMEOUT_REMOTE_CONFIG: TimeInterval = 5 // 5 seconds
     private var workItemTimeOut: DispatchWorkItem? // Create a private DispatchWorkItem property
 
@@ -44,7 +52,7 @@ public class RemoteConfigManager: NSObject {
     
     private func initRemoteConfig() {
         let settings = RemoteConfigSettings()
-        settings.minimumFetchInterval = 0
+        settings.minimumFetchInterval = devMode ? 0 :MINIMUM_FETCH_INTERVAL
         settings.fetchTimeout = TIMEOUT_REMOTE_CONFIG
         remoteConfig.configSettings = settings
         remoteConfig.addOnConfigUpdateListener { [weak self] configUpdate, error in
@@ -63,6 +71,24 @@ public class RemoteConfigManager: NSObject {
                                             completion: { _ in })
             }
         }
+    }
+    
+    public func fetchAndActiveConfig(completion: @escaping ((_ success: Bool) -> Void)) {
+        remoteConfig.fetchAndActivate(completionHandler: { [weak self] status, error in
+            print("Callback fetch remote config")
+            guard let self = self else { return }
+            switch status {
+            case .successFetchedFromRemote, .successUsingPreFetchedData:
+                print("Config success need active")
+                completion(true)
+            case .error:
+                print("Config not fetched")
+                print("Error: \(error?.localizedDescription ?? "Has error")")
+                completion(false)
+            @unknown default:
+                completion(false)
+            }
+        })
     }
     
     public func fetchConfig(completion: @escaping ((_ success: Bool) -> Void)) {

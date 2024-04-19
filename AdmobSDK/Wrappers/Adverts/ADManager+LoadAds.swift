@@ -34,7 +34,7 @@ extension UIApplicationDelegate {
 // MARK: - Load and reload Ads
 extension ADManager {
     
-    fileprivate var isTestMode: Bool { // Setting cho chế độ testmode
+    public var isTestMode: Bool { // Setting cho chế độ testmode
         return showState?.isTestMode ?? false
     }
     
@@ -129,7 +129,22 @@ extension ADManager {
         }
     }
     
-    public func loadFull(_ id: AdConfigId, isSplash: Bool = true, _ completion: ((AdvertResult) -> Void)? = nil) {
+    public func preloadInterstitial(_ id: AdConfigId) {
+        var adId = id.adUnitId
+        if isTestMode {
+            adId = SampleAdUnitID.adFormatInterstitialVideo
+        }
+        BBLLogging.d("ADMANAGER: FULL \(adId)")
+        guard isShowFull,
+              id.isEnableAd else {
+            BBLLogging.d("ADMANAGER: FULL REMOTE CLOSE")
+            return
+        }
+        BBLLogging.d("ADMANAGER: FULL Loading")
+        AdMobManager.shared.createAdInterstitialIfNeed(unitId: adId)
+    }
+    
+    public func loadFull(_ id: AdConfigId, isSplash: Bool = false, _ completion: ((AdvertResult) -> Void)? = nil) {
         var adId = id.adUnitId
         if isTestMode {
             adId = SampleAdUnitID.adFormatInterstitialVideo
@@ -143,14 +158,9 @@ extension ADManager {
         }
         if isShowingAd {
             BBLLogging.d("ADMANAGER: FULL HAS AD SHOWING")
+            completion?(.showed)
             return
         }
-        if (Int(Date().timeIntervalSince1970) - timeShowFull) <= timeRemoteShowFull {
-            BBLLogging.d("ADMANAGER: FULL NOT MATCH TIME")
-            completion?(.closed)
-            return
-        }
-        self.timeShowFull = Int(Date().timeIntervalSince1970)
         self.isShowingAd = true
         BBLLogging.d("ADMANAGER: FULL Loading")
         AdMobManager.shared.showIntertitial(unitId: adId, isSplash: isSplash, blockDidDismiss: { [weak self] in
@@ -160,6 +170,21 @@ extension ADManager {
             completion?(.closed)
             AdMobManager.shared.createAdInterstitialIfNeed(unitId: adId)
         })
+    }
+    
+    public func preLoadReward(_ id: AdConfigId) {
+        var adId = id.adUnitId
+        if isTestMode {
+            adId = SampleAdUnitID.adFormatRewarded
+        }
+        BBLLogging.d("ADMANAGER: REWARD \(adId)")
+        guard isShowReward,
+              id.isEnableAd else {
+            BBLLogging.d("ADMANAGER: REWARD REMOTE CLOSE")
+            return
+        }
+        BBLLogging.d("ADMANAGER: REWARD SHOWED started")
+        AdMobManager.shared.createAdRewardedIfNeed(unitId: adId)
     }
     
     public func loadReward(_ id: AdConfigId, _ completion: ((AdvertResult) -> Void)? = nil) {
@@ -176,14 +201,9 @@ extension ADManager {
         }
         if isShowingAd {
             BBLLogging.d("ADMANAGER: REWARD HAS AD SHOWING")
+            completion?(.showed)
             return
         }
-        if (Int(Date().timeIntervalSince1970) - timeShowReward) <= timeRemoteShowReward {
-            BBLLogging.d("ADMANAGER: REWARD NOT MATCH TIME")
-            completion?(.closed)
-            return
-        }
-        self.timeShowReward = Int(Date().timeIntervalSince1970)
         self.isShowingAd = true
         BBLLogging.d("ADMANAGER: REWARD SHOWED started")
         AdMobManager.shared.showRewarded(unitId: adId) { [weak self] earned in
@@ -307,6 +327,7 @@ extension ADManager {
                            to view: UIView,
                            refreshAd: Bool = false,
                            nativeAdType: NativeAdType = .smallMedia,
+                           ratio: GADMediaAspectRatio = .landscape,
                            _ completion: @escaping ((_ adId: String,
                                                      _ success: Bool,
                                                      _ nativeAdView: NativeAdProtocol?) -> Void)) {
@@ -323,9 +344,9 @@ extension ADManager {
             BBLLogging.d("ADMANAGER: NATIVE LOAD FAILED: \(adId)")
             completion(adId, false, nil)
         }
-        AdMobManager.shared.blockLoadNativeSuccess = { adId, nativeAdView in
-            BBLLogging.d("ADMANAGER: NATIVE LOAD SUCCESS: \(adId ?? "")")
-            if adId?.elementsEqual(id.adId) == true {
+        AdMobManager.shared.blockLoadNativeSuccess = { idRequested, nativeAdView in
+            BBLLogging.d("ADMANAGER: NATIVE LOAD SUCCESS: \(idRequested ?? "")")
+            if idRequested?.elementsEqual(adId.rawValue) == true {
                 if let adView = nativeAdView?.getGADView() {
                     adView.translatesAutoresizingMaskIntoConstraints = false
                     view.addSubview(adView)
@@ -337,14 +358,14 @@ extension ADManager {
                     
                     ])
                 }
-                completion(adId ?? "", true, nativeAdView)
+                completion(idRequested ?? "", true, nativeAdView)
             }
         }
         AdMobManager.shared.addAdNative(unitId: adId,
                                         view: view,
                                         refreshAd: refreshAd,
                                         type: nativeAdType,
-                                        ratio: .any)
+                                        ratio: ratio)
     }
     
 }
