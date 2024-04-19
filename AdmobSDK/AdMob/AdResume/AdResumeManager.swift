@@ -158,18 +158,24 @@ open class AdResumeManager: NSObject {
     }
     
     private func addBackGroundViewWhenShowAd() {
-         backgroudView = UIView()
-         backgroudView.backgroundColor = .white
-         backgroudView.tag = 1000
-         UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.addSubview(backgroudView)
-         backgroudView.snp.makeConstraints { make in
-             make.edges.equalToSuperview()
-         }
-     }
-
-     private func removeBackGroundWhenDismissAd() {
-         backgroudView.removeFromSuperview()
-     }
+        backgroudView = UIView()
+        backgroudView.backgroundColor = .white
+        backgroudView.tag = 1000
+        backgroudView.translatesAutoresizingMaskIntoConstraints = false
+        if let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) {
+            window.addSubview(backgroudView)
+            NSLayoutConstraint.activate([
+                window.topAnchor.constraint(equalTo: backgroudView.topAnchor, constant: 0),
+                window.bottomAnchor.constraint(equalTo: backgroudView.bottomAnchor, constant: 0),
+                window.leadingAnchor.constraint(equalTo: backgroudView.leadingAnchor, constant: 0),
+                window.trailingAnchor.constraint(equalTo: backgroudView.trailingAnchor, constant: 0)
+            ])
+        }
+    }
+    
+    private func removeBackGroundWhenDismissAd() {
+        backgroudView.removeFromSuperview()
+    }
 }
 
 extension AdResumeManager: GADFullScreenContentDelegate {
