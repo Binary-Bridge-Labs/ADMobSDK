@@ -130,7 +130,7 @@ extension AdMobManager {
                               view: UIView? = nil,
                               refreshAd: Bool = false,
                               type: NativeAdType = .smallMedia,
-                              ratio: GADMediaAspectRatio = .portrait) {
+                              ratio: GADMediaAspectRatio) {
         if let loader = getNativeAdLoader(unitId: unitId),
             loader.isLoading { return }
         guard let rootVC = UIApplication.getTopViewController() else {
@@ -151,7 +151,8 @@ extension AdMobManager {
         }
     }
     
-    private func loadAdNative(unitId: AdUnitID, rootVC: UIViewController, numberOfAds: Int, ratio: GADMediaAspectRatio) {
+    private func loadAdNative(unitId: AdUnitID, rootVC: UIViewController,
+                              numberOfAds: Int, ratio: GADMediaAspectRatio) {
         if let loader = getNativeAdLoader(unitId: unitId) {
             loader.delegate = self
             loader.load(GADRequest())

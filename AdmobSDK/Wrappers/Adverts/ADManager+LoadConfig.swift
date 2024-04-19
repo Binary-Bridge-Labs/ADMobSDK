@@ -50,7 +50,6 @@ extension ADManager {
     }
     
     internal func initialAdverts() {
-        if !loadableAd { return }
         BBLLogging.d("ADMANAGER: CONFIG ADMOB started")
         
         let remoteConfig = RemoteConfigManager.shared
@@ -66,21 +65,12 @@ extension ADManager {
     
     internal func loadDefaults() {
         BBLLogging.d("ADMANAGER")
-        if loadableAd {
-            self.showState = AdShowState(version: nil,
+        self.showState = AdShowState(version: nil,
                                          isShowBanner: true,
                                          isShowOpen: true,
                                          isShowFull: true,
                                          isShowNative: true,
                                          isTestMode: false)
-        } else {
-            self.showState = AdShowState(version: nil,
-                                         isShowBanner: false,
-                                         isShowOpen: false,
-                                         isShowFull: false,
-                                         isShowNative: false,
-                                         isTestMode: false)
-        }
         self.configTime = AdConfigTime(timeShowOpen: 15,
                                        timeShowFull: 20,
                                        timeShowReward: 20,

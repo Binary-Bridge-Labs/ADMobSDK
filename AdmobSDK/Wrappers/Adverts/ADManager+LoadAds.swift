@@ -141,10 +141,10 @@ extension ADManager {
             return
         }
         BBLLogging.d("ADMANAGER: FULL Loading")
-        AdMobManager.shared.createAdRewardedIfNeed(unitId: adId)
+        AdMobManager.shared.createAdInterstitialIfNeed(unitId: adId)
     }
     
-    public func loadFull(_ id: AdConfigId, isSplash: Bool = true, _ completion: ((AdvertResult) -> Void)? = nil) {
+    public func loadFull(_ id: AdConfigId, isSplash: Bool = false, _ completion: ((AdvertResult) -> Void)? = nil) {
         var adId = id.adUnitId
         if isTestMode {
             adId = SampleAdUnitID.adFormatInterstitialVideo
@@ -327,6 +327,7 @@ extension ADManager {
                            to view: UIView,
                            refreshAd: Bool = false,
                            nativeAdType: NativeAdType = .smallMedia,
+                           ratio: GADMediaAspectRatio = .landscape,
                            _ completion: @escaping ((_ adId: String,
                                                      _ success: Bool,
                                                      _ nativeAdView: NativeAdProtocol?) -> Void)) {
@@ -364,7 +365,7 @@ extension ADManager {
                                         view: view,
                                         refreshAd: refreshAd,
                                         type: nativeAdType,
-                                        ratio: .any)
+                                        ratio: ratio)
     }
     
 }

@@ -56,7 +56,6 @@ public class ADManager: NSObject {
     
     internal var showState: AdShowState?
     internal var configTime: AdConfigTime?
-    public var loadableAd = true
     
     override init() {
         super.init()
@@ -102,7 +101,7 @@ public class ADManager: NSObject {
     
 }
 
-extension DispatchQueue {
+public extension DispatchQueue {
     
     func asyncSafety(_ closure: @escaping () -> Void) {
         guard self === DispatchQueue.main && Thread.isMainThread else {
@@ -122,7 +121,7 @@ extension DispatchQueue {
     
 }
 
-extension Bundle {
+public extension Bundle {
     var releaseVersionNumber: String {
         return (infoDictionary?["CFBundleShortVersionString"] as? String) ?? ""
     }

@@ -53,15 +53,15 @@ public final class BBLLogging: NSObject {
 //        #if DEBUG
         switch level {
         case .debug:
-            NSLog("🟦 Logging->D: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
+            NSLog("🟦 Debug: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
         case .error:
-            NSLog("🟥 Logging->E: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
+            NSLog("🟥 Error: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
         case .info:
-            NSLog("🟩 Logging->I: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
+            NSLog("🟩 Info: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
         case .verbose:
-            NSLog("🟧 Logging->V: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
+            NSLog("🟧 Verbose: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
         case .warning:
-            NSLog("🟨 Logging->W: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
+            NSLog("🟨 Warning: %@ %@", "\((file as NSString).lastPathComponent).\(function):\(line)", message())
         }
 //        #endif
     }
