@@ -60,7 +60,7 @@ extension AdMobManager {
         createAdRewardedIfNeed(unitId: unitId)
         let rewarded = getAdRewarded(unitId: unitId)
         didEarnReward = false
-        if let topVC =  UIApplication.getTopViewController() {
+        if let topVC = UIApplication.getTopViewController() {
             rewarded?.present(fromRootViewController: topVC) { [weak self] in
                 self?.didEarnReward = true
             }
@@ -80,6 +80,7 @@ extension AdMobManager {
             guard let rootVC = rootVC else { return }
             
             let loadingVC = AdFullScreenLoadingVC.createViewController(unitId: unitId, adType: .reward(id: unitId))
+            loadingVC.view.translatesAutoresizingMaskIntoConstraints = false
             loadingVC.blockDidDismiss = { [weak loadingVC] in
                 loadingVC?.view.removeFromSuperview()
                 loadingVC?.removeFromParent()
