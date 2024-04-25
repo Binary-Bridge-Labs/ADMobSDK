@@ -348,6 +348,7 @@ extension ADManager {
             BBLLogging.d("ADMANAGER: NATIVE LOAD SUCCESS: \(idRequested ?? "")")
             if idRequested?.elementsEqual(adId.rawValue) == true {
                 if let adView = nativeAdView?.getGADView() {
+                    adView.removeFromSuperview()
                     adView.translatesAutoresizingMaskIntoConstraints = false
                     view.addSubview(adView)
                     NSLayoutConstraint.activate([

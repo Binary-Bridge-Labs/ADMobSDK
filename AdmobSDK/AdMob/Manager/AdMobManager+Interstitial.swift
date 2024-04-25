@@ -88,41 +88,41 @@ extension AdMobManager: GADFullScreenContentDelegate {
             return
         }
         
-        if AdMobManager.shared.getAdInterstitial(unitId: unitId) != nil {
-            AdResumeManager.shared.isShowingAd = true // kiểm tra nếu show inter thì ko show resume
-            var rootVC = UIApplication.getTopViewController()
-            if rootVC?.navigationController != nil {
-                rootVC = rootVC?.navigationController
-                if rootVC?.tabBarController != nil {
-                    rootVC = rootVC?.tabBarController
-                }
-            }
-            guard let rootVC = rootVC else { return }
-            print("rootVC: \(rootVC)")
-            let loadingVC = AdFullScreenLoadingVC.createViewController(unitId: unitId, adType: .interstitial(id: unitId))
-            loadingVC.view.translatesAutoresizingMaskIntoConstraints = false
-            loadingVC.blockDidDismiss = { [weak loadingVC] in
-                loadingVC?.willMove(toParent: nil)
-                loadingVC?.view.removeFromSuperview()
-                loadingVC?.removeFromParent()
-                self.isSplash = false
-                blockDidDismiss?()
-            }
-            loadingVC.blockWillDismiss = blockWillDismiss
-            rootVC.addChild(loadingVC)
-            rootVC.view.addSubview(loadingVC.view)
-            NSLayoutConstraint.activate([
-                loadingVC.view.topAnchor.constraint(equalTo: rootVC.view.topAnchor, constant: 0),
-                loadingVC.view.leadingAnchor.constraint(equalTo: rootVC.view.leadingAnchor, constant: 0),
-                loadingVC.view.trailingAnchor.constraint(equalTo: rootVC.view.trailingAnchor, constant: 0),
-                loadingVC.view.bottomAnchor.constraint(equalTo: rootVC.view.bottomAnchor, constant: 0)
-            ])
-            loadingVC.didMove(toParent: rootVC.parent)
-        } else {
+        let loadingVC = AdFullScreenLoadingVC.createViewController(unitId: unitId, adType: .interstitial(id: unitId))
+        if AdMobManager.shared.getAdInterstitial(unitId: unitId) == nil {
             createAdInterstitialIfNeed(unitId: unitId)
-            blockWillDismiss?()
+        }
+        AdResumeManager.shared.isShowingAd = true // kiểm tra nếu show inter thì ko show resume
+        var rootVC = UIApplication.getTopViewController()
+        if rootVC?.navigationController != nil {
+            rootVC = rootVC?.navigationController
+            if rootVC?.tabBarController != nil {
+                rootVC = rootVC?.tabBarController
+            }
+        }
+        guard let rootVC = rootVC else {
+            blockDidDismiss?()
+            return
+        }
+        print("rootVC: \(rootVC)")
+        loadingVC.view.translatesAutoresizingMaskIntoConstraints = false
+        loadingVC.blockDidDismiss = { [weak loadingVC] in
+            loadingVC?.willMove(toParent: nil)
+            loadingVC?.view.removeFromSuperview()
+            loadingVC?.removeFromParent()
+            self.isSplash = false
             blockDidDismiss?()
         }
+        loadingVC.blockWillDismiss = blockWillDismiss
+        rootVC.addChild(loadingVC)
+        rootVC.view.addSubview(loadingVC.view)
+        NSLayoutConstraint.activate([
+            loadingVC.view.topAnchor.constraint(equalTo: rootVC.view.topAnchor, constant: 0),
+            loadingVC.view.leadingAnchor.constraint(equalTo: rootVC.view.leadingAnchor, constant: 0),
+            loadingVC.view.trailingAnchor.constraint(equalTo: rootVC.view.trailingAnchor, constant: 0),
+            loadingVC.view.bottomAnchor.constraint(equalTo: rootVC.view.bottomAnchor, constant: 0)
+        ])
+        loadingVC.didMove(toParent: rootVC.parent)
     }
     
     // MARK: - GADInterstitialDelegate

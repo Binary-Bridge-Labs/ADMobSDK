@@ -13,15 +13,15 @@ import FirebaseAnalytics
 // MARK: - GADBannerView
 extension AdMobManager: GADBannerViewDelegate {
     
-   fileprivate func getAdBannerView(unitId: AdUnitID) -> GADBannerView? {
-       if let interstitial = listAd.object(forKey: unitId.rawValue) as? GADBannerView  {
+    fileprivate func getAdBannerView(unitId: AdUnitID) -> GADBannerView? {
+        if let interstitial = listAd.object(forKey: unitId.rawValue) as? GADBannerView  {
             return interstitial
         }
         return nil
     }
     
-   public func createAdBannerIfNeed(unitId: AdUnitID) -> GADBannerView {
-       if let adBannerView = self.getAdBannerView(unitId: unitId) {
+    public func createAdBannerIfNeed(unitId: AdUnitID) -> GADBannerView {
+        if let adBannerView = self.getAdBannerView(unitId: unitId) {
             return adBannerView
         }
         let adBannerView = GADBannerView()
@@ -29,7 +29,7 @@ extension AdMobManager: GADBannerViewDelegate {
         adBannerView.paidEventHandler = { value in
             self.trackAdRevenue(value: value, unitId: adBannerView.adUnitID ?? "")
         }
-       listAd.setObject(adBannerView, forKey: unitId.rawValue as NSCopying)
+        listAd.setObject(adBannerView, forKey: unitId.rawValue as NSCopying)
         return adBannerView
     }
     

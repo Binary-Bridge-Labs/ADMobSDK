@@ -86,7 +86,10 @@ extension AdMobManager {
         return nil
     }
     
-    private func createAdNativeView(unitId: AdUnitID, type: NativeAdType = .small) {
+    private func createAdNativeView(unitId: AdUnitID,
+                                    type: NativeAdType = .small,
+                                    view: UIView? = nil
+    ) {
         if let _ = getAdNative(unitId: unitId.rawValue) {
             return
         }
@@ -94,6 +97,26 @@ extension AdMobManager {
             let nibObjects = Bundle.main.loadNibNamed(type.nibName, owner: nil, options: nil),
             let adNativeProtocol = nibObjects.first as? NativeAdProtocol else {
             return
+        }
+        if let parent = view {
+            let adNativeView = adNativeProtocol.getGADView()
+            adNativeView.removeFromSuperview()
+            adNativeView.translatesAutoresizingMaskIntoConstraints = false
+            parent.addSubview(adNativeView)
+            NSLayoutConstraint.activate([
+                adNativeView.topAnchor.constraint(equalTo: parent.topAnchor, constant: 0),
+                adNativeView.bottomAnchor.constraint(equalTo: parent.bottomAnchor, constant: 0),
+                adNativeView.leadingAnchor.constraint(equalTo: parent.leadingAnchor, constant: 0),
+                adNativeView.trailingAnchor.constraint(equalTo: parent.trailingAnchor, constant: 0)
+            ])
+            adNativeView.layoutIfNeeded()
+            adNativeView.isSkeletonable = true
+            let gradient = SkeletonGradient(baseColor: self.skeletonGradient)
+            let animation = SkeletonAnimationBuilder()
+                .makeSlidingAnimation(withDirection: .leftRight,
+                                      duration: 0.7)
+            adNativeView.showAnimatedGradientSkeleton(usingGradient: gradient,
+                                                      animation: animation)
         }
         listNativeAd[unitId.rawValue] = adNativeProtocol
     }
@@ -109,7 +132,7 @@ extension AdMobManager {
                                   type: NativeAdType = .smallMedia,
                                   ratio: GADMediaAspectRatio = .portrait) {
         if let loader = getNativeAdLoader(unitId: unitId),
-            loader.isLoading {
+           loader.isLoading {
             return
         }
         if refreshAd {
@@ -132,14 +155,14 @@ extension AdMobManager {
                               type: NativeAdType = .smallMedia,
                               ratio: GADMediaAspectRatio) {
         if let loader = getNativeAdLoader(unitId: unitId),
-            loader.isLoading { return }
+           loader.isLoading { return }
         guard let rootVC = UIApplication.getTopViewController() else {
             blockNativeFailed?(unitId.rawValue)
             return
         }
         if refreshAd {
             removeNativeAd(unitId: unitId.rawValue)
-            createAdNativeView(unitId: unitId, type: type)
+            createAdNativeView(unitId: unitId, type: type, view: view)
             loadAdNative(unitId: unitId, rootVC: rootVC, numberOfAds: 1, ratio: ratio)
         } else {
             if var nativeAdProtocol = getAdNative(unitId: unitId.rawValue) {

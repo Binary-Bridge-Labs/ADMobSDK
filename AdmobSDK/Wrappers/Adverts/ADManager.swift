@@ -73,8 +73,10 @@ public class ADManager: NSObject {
         if !testIds.isEmpty {
             GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers = testIds
         }
-        GADMobileAds.sharedInstance().start()
         AdMobManager.shared.adsNativeColor = style
+        DispatchQueue.main.asyncSafety {
+            GADMobileAds.sharedInstance().start()
+        }
     }
     
     public func disableAds() {

@@ -90,16 +90,27 @@ open class AdResumeManager: NSObject {
             loadingVC.needLoadAd = false
             loadingVC.isOpenAd = true
             loadingVC.modalPresentationStyle = .fullScreen
+            var parentWindow: UIWindow?
             if let window = UIApplication.shared.keyWindow {
-                window.addSubview(loadingVC.view)
+                parentWindow = window
             } else if let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) {
-                window.addSubview(loadingVC.view)
-            } else { return false }
-            showVC.view.endEditing(true)
-            if loadingVC.view.superview != nil {
-                loadingVC.view.snp.makeConstraints { make in
-                    make.edges.equalToSuperview()
-                }
+                parentWindow = window
+            } else {
+                parentWindow = nil
+            }
+            if let window = parentWindow,
+               let viewContent = loadingVC.view {
+                viewContent.translatesAutoresizingMaskIntoConstraints = false
+                window.addSubview(viewContent)
+                showVC.view.endEditing(true)
+                NSLayoutConstraint.activate([
+                    window.topAnchor.constraint(equalTo: viewContent.topAnchor, constant: 0),
+                    window.bottomAnchor.constraint(equalTo: viewContent.bottomAnchor, constant: 0),
+                    window.leadingAnchor.constraint(equalTo: viewContent.leadingAnchor, constant: 0),
+                    window.trailingAnchor.constraint(equalTo: viewContent.trailingAnchor, constant: 0)
+                ])
+            } else {
+                return false
             }
             
             ad.paidEventHandler = { [weak self] value in
