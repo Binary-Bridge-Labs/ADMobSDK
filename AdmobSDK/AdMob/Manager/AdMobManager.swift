@@ -14,8 +14,8 @@ import FirebaseAnalytics
 
 //    MARK: - Google-provided demo ad units
 public struct SampleAdUnitID {
-    public static let adFormatAppOpen              = AdUnitID(rawValue: "ca-app-pub-3940256099942544/9257395921")
-    public static let adFormatBanner               = AdUnitID(rawValue: "ca-app-pub-3940256099942544/6300978111")
+    public static let adFormatAppOpen              = AdUnitID(rawValue: "ca-app-pub-3940256099942544/5575463023")
+    public static let adFormatBanner               = AdUnitID(rawValue: "ca-app-pub-3940256099942544/2934735716")
     public static let adFormatCollapsibleBanner    = AdUnitID(rawValue: "ca-app-pub-3940256099942544/2435281174")
     public static let adFormatBanner_2             = AdUnitID(rawValue: "ca-app-pub-3940256099942544/2934735716")
     public static let adFormatInterstitial         = AdUnitID(rawValue: "ca-app-pub-3940256099942544/4411468910")

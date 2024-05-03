@@ -10,7 +10,7 @@ import UIKit
 import FirebaseAnalytics
 
 open class AdResumeManager: NSObject {
-    var backgroudView = UIView()
+    private var backgroudView: UIView?
     public static let shared = AdResumeManager()
     
     public let timeoutInterval: TimeInterval = 4 * 3600
@@ -169,17 +169,24 @@ open class AdResumeManager: NSObject {
     }
     
     private func addBackGroundViewWhenShowAd() {
-        backgroudView = UIView()
-        backgroudView.backgroundColor = .white
-        backgroudView.tag = 1000
-        UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.addSubview(backgroudView)
-        backgroudView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+        DispatchQueue.main.asyncSafety { [weak self] in
+            self?.removeBackGroundWhenDismissAd()
+            self?.backgroudView = UIView()
+            guard let backgroundView = self?.backgroudView else { return }
+            backgroundView.backgroundColor = .white
+            backgroundView.tag = 1000
+            UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.addSubview(backgroundView)
+            backgroundView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
         }
     }
     
     private func removeBackGroundWhenDismissAd() {
-        backgroudView.removeFromSuperview()
+        DispatchQueue.main.asyncSafety { [weak self] in
+            self?.backgroudView?.removeFromSuperview()
+            self?.backgroudView = nil
+        }
     }
 }
 

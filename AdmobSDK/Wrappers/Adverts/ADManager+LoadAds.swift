@@ -38,23 +38,23 @@ extension ADManager {
         return showState?.isTestMode ?? false
     }
     
-    fileprivate var isShowBanner: Bool {
+    internal var isShowBanner: Bool {
         return (showState?.isShowBanner ?? false) && !IAPState.isUserVip
     }
     
-    fileprivate var isShowFull: Bool {
+    internal var isShowFull: Bool {
         return (showState?.isShowFull ?? false) && !IAPState.isUserVip
     }
     
-    fileprivate var isShowOpen: Bool {
+    internal var isShowOpen: Bool {
         return (showState?.isShowOpen ?? false) && !IAPState.isUserVip
     }
     
-    fileprivate var isShowNative: Bool {
+    internal var isShowNative: Bool {
         return (showState?.isShowNative ?? false) && !IAPState.isUserVip
     }
     
-    fileprivate var isShowReward: Bool {
+    internal var isShowReward: Bool {
         return (showState?.isShowReward ?? false) && !IAPState.isUserVip
     }
     
@@ -85,8 +85,7 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatAppOpen
         }
         BBLLogging.d("ADMANAGER: OPEN \(adId.rawValue)")
-        guard isShowOpen,
-              id.isEnableAd else {
+        guard               id.isEnableAd else {
             BBLLogging.d("ADMANAGER: OPEN REMOTE CLOSE")
             return
         }
@@ -107,16 +106,15 @@ extension ADManager {
     }
     
     public func loadOpenAsync(_ id: AdConfigId, completion: @escaping ((_ showed: Bool) -> Void)) {
-        let adId = id.adUnitId
+        var adId = id.adUnitId
         if isTestMode {
             // TODO: AppOpen Test not working show disable this ads for testmode
-            // adId = SampleAdUnitID.adFormatAppOpen
-            completion(false)
-            return
+            adId = SampleAdUnitID.adFormatAppOpen
+            //            completion(false)
+            //            return
         }
         BBLLogging.d("ADMANAGER: OPEN \(adId.rawValue)")
-        guard isShowOpen,
-              id.isEnableAd else {
+        guard               id.isEnableAd else {
             BBLLogging.d("ADMANAGER: OPEN REMOTE CLOSE")
             completion(false)
             return
@@ -135,8 +133,7 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatInterstitialVideo
         }
         BBLLogging.d("ADMANAGER: FULL \(adId)")
-        guard isShowFull,
-              id.isEnableAd else {
+        guard               id.isEnableAd else {
             BBLLogging.d("ADMANAGER: FULL REMOTE CLOSE")
             return
         }
@@ -150,8 +147,7 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatInterstitialVideo
         }
         BBLLogging.d("ADMANAGER: FULL \(adId)")
-        guard isShowFull,
-              id.isEnableAd else {
+        guard               id.isEnableAd else {
             BBLLogging.d("ADMANAGER: FULL REMOTE CLOSE")
             completion?(.closed)
             return
@@ -172,19 +168,19 @@ extension ADManager {
         })
     }
     
-    public func preLoadReward(_ id: AdConfigId) {
+    public func preLoadReward(_ id: AdConfigId,
+                              completion: BoolBlockAds? = nil) {
         var adId = id.adUnitId
         if isTestMode {
             adId = SampleAdUnitID.adFormatRewarded
         }
         BBLLogging.d("ADMANAGER: REWARD \(adId)")
-        guard isShowReward,
-              id.isEnableAd else {
+        guard               id.isEnableAd else {
             BBLLogging.d("ADMANAGER: REWARD REMOTE CLOSE")
             return
         }
         BBLLogging.d("ADMANAGER: REWARD SHOWED started")
-        AdMobManager.shared.createAdRewardedIfNeed(unitId: adId)
+        AdMobManager.shared.createAdRewardedIfNeed(unitId: adId, completion: completion)
     }
     
     public func loadReward(_ id: AdConfigId, _ completion: ((AdvertResult) -> Void)? = nil) {
@@ -193,8 +189,7 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatRewarded
         }
         BBLLogging.d("ADMANAGER: REWARD \(adId)")
-        guard isShowReward,
-              id.isEnableAd else {
+        guard               id.isEnableAd else {
             BBLLogging.d("ADMANAGER: REWARD REMOTE CLOSE")
             completion?(.closed)
             return
@@ -224,9 +219,8 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatBanner
         }
         BBLLogging.d("ADMANAGER: BANNER  \(adId)")
-        guard isShowBanner,
-                id.isEnableAd,
-              let viewController = UIApplication.shared.delegate?.getRootViewController() else {
+        guard                 id.isEnableAd,
+                              let viewController = UIApplication.shared.delegate?.getRootViewController() else {
             completion(false)
             BBLLogging.d("ADMANAGER: BANNER REMOTE CLOSE")
             return
@@ -252,9 +246,8 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatBanner_2
         }
         BBLLogging.d("ADMANAGER: BANNER")
-        guard isShowBanner,
-              id.isEnableAd,
-              let viewController = UIApplication.shared.delegate?.getRootViewController() else {
+        guard               id.isEnableAd,
+                            let viewController = UIApplication.shared.delegate?.getRootViewController() else {
             completion(false)
             BBLLogging.d("ADMANAGER: BANNER REMOTE CLOSE")
             return
@@ -283,9 +276,8 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatCollapsibleBanner
         }
         BBLLogging.d("ADMANAGER: BANNER")
-        guard isShowBanner,
-              id.isEnableAd,
-              let viewController = UIApplication.shared.delegate?.getRootViewController() else {
+        guard               id.isEnableAd,
+                            let viewController = UIApplication.shared.delegate?.getRootViewController() else {
             completion(false)
             BBLLogging.d("ADMANAGER: BANNER REMOTE CLOSE")
             return
@@ -313,8 +305,7 @@ extension ADManager {
         if isTestMode {
             adId = SampleAdUnitID.adFormatNativeAdvancedVideo
         }
-        guard isShowNative,
-              id.isEnableAd else {
+        guard            id.isEnableAd else {
             return
         }
         AdMobManager.shared.preloadAdNative(unitId: adId,
@@ -335,8 +326,7 @@ extension ADManager {
         if isTestMode {
             adId = SampleAdUnitID.adFormatNativeAdvancedVideo
         }
-        guard isShowNative,
-              id.isEnableAd else {
+        guard id.isEnableAd else {
             completion(id.adId, false, nil)
             return
         }
@@ -356,7 +346,7 @@ extension ADManager {
                         adView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
                         adView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
                         adView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0)
-                    
+                        
                     ])
                 }
                 completion(idRequested ?? "", true, nativeAdView)

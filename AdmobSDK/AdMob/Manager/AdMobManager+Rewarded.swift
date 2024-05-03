@@ -19,7 +19,8 @@ extension AdMobManager {
     }
     
     /// khởi tạo id ads trước khi show
-    public func createAdRewardedIfNeed(unitId: AdUnitID, completion: BoolBlockAds? = nil) {
+    public func createAdRewardedIfNeed(unitId: AdUnitID,
+                                       completion: BoolBlockAds? = nil) {
         if self.getAdRewarded(unitId: unitId) != nil {
             completion?(true)
             return

@@ -27,8 +27,32 @@ public extension AdConfigId {
     }
     
     var isEnableAd: Bool {
+        if IAPState.isUserVip {
+            return false
+        }
+        switch adType {
+        case .OpenApp:
+            if !ADManager.shared.isShowOpen {
+                return false
+            }
+        case .Banner:
+            if !ADManager.shared.isShowBanner {
+                return false
+            }
+        case .Reward:
+            if !ADManager.shared.isShowReward {
+                return false
+            }
+        case .Interstitial:
+            if !ADManager.shared.isShowFull {
+                return false
+            }
+        case .Native:
+            if !ADManager.shared.isShowNative {
+                return false
+            }
+        }
         return (RemoteConfigManager.shared.getValue(by: name)?.boolValue ?? false)
-        && !IAPState.isUserVip
     }
     
 }
