@@ -1,6 +1,6 @@
 //
 //  UMPUtils.swift
-//  PrankSound-iOS
+//  Pet Translator-iOS
 //
 //  Created by Animat on 20/12/2023.
 //  Copyright © 2024 BBLabs. All rights reserved.

@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "AdmobSDK"
-  spec.version      = "0.0.11"
+  spec.version      = "0.0.12"
   spec.summary      = "A small framework extending from Google-Mobile-Ads-SDK"
 
   spec.description  = <<-DESC
@@ -55,6 +55,10 @@ Pod::Spec.new do |spec|
   
   ### Swift storekit
   spec.dependency 'SwiftyStoreKit'
+  
+  ### Lottie Animation
+  
+  spec.dependency 'lottie-ios'
   
 
 end

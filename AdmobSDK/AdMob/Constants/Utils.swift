@@ -23,4 +23,11 @@ extension UIView {
         mask.path = path.cgPath
         layer.mask = mask
     }
+    
+    @available(iOS 11.0, *)
+    func roundCorners(corners: CACornerMask, radius: CGFloat) {
+        layer.cornerRadius = radius
+        layer.maskedCorners = corners
+    }
+    
 }

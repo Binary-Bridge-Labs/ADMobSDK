@@ -79,6 +79,8 @@ extension ADManager {
 extension ADManager {
     
     public func loadOpen(_ id: AdConfigId) {
+        if AdResumeManager.shared.isShowingAd
+            || AdResumeManager.shared.isLoadingAd { return }
         AdResumeManager.shared.appOpenAdManagerDelegate = nil
         var adId = id.adUnitId
         if isTestMode {
