@@ -87,6 +87,7 @@ public class ADManager: NSObject {
                                      isShowBanner: false,
                                      isShowOpen: false,
                                      isShowFull: false,
+                                     isShowReward: false,
                                      isShowNative: false,
                                      isTestMode: false)
         timeShowOpen = 0
@@ -108,6 +109,7 @@ public class ADManager: NSObject {
                                      isShowBanner: false,
                                      isShowOpen: false,
                                      isShowFull: false,
+                                     isShowReward: false,
                                      isShowNative: false,
                                      isTestMode: false)
     }

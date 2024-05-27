@@ -177,7 +177,7 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatRewarded
         }
         BBLLogging.d("ADMANAGER: REWARD \(adId)")
-        guard               id.isEnableAd else {
+        guard id.isEnableAd else {
             BBLLogging.d("ADMANAGER: REWARD REMOTE CLOSE")
             return
         }

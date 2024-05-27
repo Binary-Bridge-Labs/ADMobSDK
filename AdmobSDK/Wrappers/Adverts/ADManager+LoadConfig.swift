@@ -30,6 +30,7 @@ extension ADManager {
                                          isShowBanner: true,
                                          isShowOpen: true,
                                          isShowFull: true,
+                                         isShowReward: true,
                                          isShowNative: true,
                                          isTestMode: false)
         }
@@ -66,11 +67,12 @@ extension ADManager {
     internal func loadDefaults() {
         BBLLogging.d("ADMANAGER")
         self.showState = AdShowState(version: nil,
-                                         isShowBanner: true,
-                                         isShowOpen: true,
-                                         isShowFull: true,
-                                         isShowNative: true,
-                                         isTestMode: false)
+                                     isShowBanner: true,
+                                     isShowOpen: true,
+                                     isShowFull: true,
+                                     isShowReward: true,
+                                     isShowNative: true,
+                                     isTestMode: false)
         self.configTime = AdConfigTime(timeShowOpen: 15,
                                        timeShowFull: 20,
                                        timeShowReward: 20,
