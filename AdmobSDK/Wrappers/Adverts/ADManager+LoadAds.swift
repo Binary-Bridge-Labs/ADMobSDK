@@ -362,3 +362,74 @@ extension ADManager {
     }
     
 }
+
+// Loading New single Banner
+extension ADManager {
+    
+    public func loadSingleBanner(_ id: AdConfigId, viewBanner: UIView, completion: @escaping ((_ success: Bool) -> Void)) {
+        var adId = id.adUnitId
+        if isTestMode {
+            adId = SampleAdUnitID.adFormatBanner
+        }
+        BBLLogging.d("ADMANAGER: BANNER  \(adId)")
+        guard id.isEnableAd,
+              let viewController = UIApplication.shared.delegate?.getRootViewController() else {
+            completion(false)
+            BBLLogging.d("ADMANAGER: BANNER REMOTE CLOSE")
+            return
+        }
+        BannerLoader.shared.addAdBanner(unitId: adId, rootVC: viewController, view: viewBanner, completion: { unitId, success in
+            completion(success)
+        }, clickBanner: { unitId in
+            self.loadSingleBanner(id, viewBanner: viewBanner, completion: completion)
+        })
+    }
+    
+    public func loadSingleBannerAdaptive(_ id: AdConfigId, viewBanner: UIView, completion: @escaping ((_ success: Bool) -> Void)) {
+        var adId = id.adUnitId
+        if isTestMode {
+            adId = SampleAdUnitID.adFormatBanner_2
+        }
+        BBLLogging.d("ADMANAGER: BANNER")
+        guard id.isEnableAd,
+              let viewController = UIApplication.shared.delegate?.getRootViewController() else {
+            completion(false)
+            BBLLogging.d("ADMANAGER: BANNER REMOTE CLOSE")
+            return
+        }
+        BannerLoader.shared.addAdBannerAdaptive(unitId: adId, rootVC: viewController, view: viewBanner, completion: { unitId, success in
+            completion(success)
+        }, clickBanner: { unitId in
+            self.loadBannerAdaptive(id, viewBanner: viewBanner, completion: completion)
+        })
+    }
+    
+    public func loadSingleCollapsibleBannerAdaptive(_ id: AdConfigId,
+                                                    viewBanner: UIView,
+                                                    isCollapsible: Bool = false,
+                                                    isTop: Bool = false,
+                                                    completion: @escaping ((_ success: Bool) -> Void)) {
+        var adId = id.adUnitId
+        if isTestMode {
+            adId = SampleAdUnitID.adFormatCollapsibleBanner
+        }
+        BBLLogging.d("ADMANAGER: BANNER")
+        guard id.isEnableAd,
+              let viewController = UIApplication.shared.delegate?.getRootViewController() else {
+            completion(false)
+            BBLLogging.d("ADMANAGER: BANNER REMOTE CLOSE")
+            return
+        }
+        BannerLoader.shared
+            .addAdCollapsibleBannerAdaptive(unitId: adId,
+                                            rootVC: viewController,
+                                            view: viewBanner,
+                                            isCollapsibleBanner: isCollapsible,
+                                            isTop: isTop, completion: { unitId, success in
+                completion(success)
+            }, clickBanner: { unitId in
+                self.loadSingleCollapsibleBannerAdaptive(id, viewBanner: viewBanner, completion: completion)
+            })
+    }
+    
+}

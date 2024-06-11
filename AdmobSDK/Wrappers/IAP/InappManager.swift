@@ -61,7 +61,7 @@ public class InappManager: NSObject {
         }
     }
     
-    private let sharedSecret: String = "973d30b0f2f845dc9f2cafe057b00dda"
+    public var sharedSecret: String = ""
     public var productIdentifiers: Set<ProductIdentifier> = Set()
     public var listProduct = Set<SKProduct>()
     public var didPaymentSuccess = BehaviorSubject<IAPState>(value: .unload)
@@ -136,6 +136,30 @@ public class InappManager: NSObject {
             $0.productIdentifier == id
         }) {
             return subscription.discounts.first?.price ?? 0
+        }
+        return 0
+    }
+    
+    public func getDiscountPeriod(id: String) -> TimeInterval {
+        if let subscription = InappManager.share.listProduct.first(where: {
+            $0.productIdentifier == id
+        }) {
+            let firstDiscount = subscription.discounts.first
+            let periodTime = firstDiscount?.subscriptionPeriod.numberOfUnits ?? 0
+            let periodUnit = firstDiscount?.subscriptionPeriod.unit
+            var duration: TimeInterval = 0 // 0s
+            switch periodUnit {
+            case .day:
+                duration = TimeInterval(periodTime * 24 * 60 * 60)
+            case .week:
+                duration = TimeInterval(7 * periodTime * 24 * 60 * 60)
+            case .month:
+                duration = TimeInterval(30 * periodTime * 24 * 60 * 60)
+            case .year:
+                duration = TimeInterval(365 * periodTime * 24 * 60 * 60)
+            default: break
+            }
+            return duration
         }
         return 0
     }

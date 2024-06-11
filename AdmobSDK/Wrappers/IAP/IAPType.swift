@@ -66,6 +66,10 @@ public extension IAPType {
         return InappManager.share.getDiscountPriceNumb(id: id)
     }
     
+    var discountPeriod: TimeInterval {
+        return InappManager.share.getDiscountPeriod(id: id)
+    }
+    
     var isBestPrice: Bool {
         guard let subscriptions = RemoteConfigManager.shared.objectJson(forKey: DefaultRemoteKey.subscriptionList, type: [SubscriptionInfo].self) else { return false}
         return subscriptions.first(where: {
