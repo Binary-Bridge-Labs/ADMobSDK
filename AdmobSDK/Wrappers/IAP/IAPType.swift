@@ -10,6 +10,26 @@ import Foundation
 public struct SubscriptionInfo: Decodable {
     let subscriptionId: String?
     let bestPrice: Bool?
+    let timeExpired: String?
+    
+    private enum CodingKeys: String, CodingKey {
+        case subscriptionId
+        case bestPrice
+        case timeExpired
+    }
+    
+    public var time2Date: Date? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        if let time = timeExpired {
+            return dateFormatter.date(from: time)
+        }
+        return nil
+    }
+    
+    public var timeDiscount: TimeInterval? {
+        return (time2Date?.timeIntervalSince1970 ?? 0) - Date().timeIntervalSince1970
+    }
 }
 
 public protocol IAPType {
@@ -75,6 +95,20 @@ public extension IAPType {
         return subscriptions.first(where: {
             ($0.subscriptionId == id) && ($0.bestPrice ?? false)
         }) != nil
+    }
+    
+    var timeExpired: Date? {
+        guard let subscriptions = RemoteConfigManager.shared.objectJson(forKey: DefaultRemoteKey.subscriptionList, type: [SubscriptionInfo].self) else { return nil }
+        return subscriptions.first(where: {
+            ($0.subscriptionId == id)
+        })?.time2Date
+    }
+    
+    var timeDiscount: TimeInterval {
+        guard let subscriptions = RemoteConfigManager.shared.objectJson(forKey: DefaultRemoteKey.subscriptionList, type: [SubscriptionInfo].self) else { return 0 }
+        return subscriptions.first(where: {
+            ($0.subscriptionId == id)
+        })?.timeDiscount ?? 0
     }
     
     static func getIdsOption() -> [String] {

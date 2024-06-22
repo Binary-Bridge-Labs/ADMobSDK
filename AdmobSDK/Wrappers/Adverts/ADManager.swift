@@ -7,6 +7,7 @@
 
 import GoogleMobileAds
 import UIKit
+import AppLovinSDK
 
 public protocol AdConfigId {
     
@@ -95,6 +96,17 @@ public class ADManager: NSObject {
     
     public func startAds(style: ThemeStyleAds = ThemeStyleAds.origin,
                   testIds: [String] = []) {
+        
+        #if canImport(AppLovinSDK)
+        if let aplvinKey = Bundle.main.object(forInfoDictionaryKey: "applovin_key") as? String, !aplvinKey.isEmpty {
+            let appLovinSetting = ALSdkInitializationConfiguration(sdkKey: aplvinKey)
+            ALSdk.shared().initialize(with: appLovinSetting,
+                                      completionHandler: { config in
+                print("APLV: config - \(config)")
+            })
+        }
+        #endif
+        
         if !testIds.isEmpty {
             GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers = testIds
         }

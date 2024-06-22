@@ -19,7 +19,7 @@ class BannerLoader: NSObject {
     
     internal static let shared = BannerLoader()
     public var timeReloadBanner: TimeInterval = 30 // 30s
-    private var listAd: [String: BannerLoaded?] = [:]
+    private var listBannerCachedAd: [String: BannerLoaded?] = [:]
     private var listLoadingAd: [String] = []
     public var skeletonGradient = UIColor.clouds
     
@@ -27,7 +27,7 @@ class BannerLoader: NSObject {
     private var listDelegateBannerClick: [String: ((_ unitId: String) -> Void)] = [:]
     
     fileprivate func getAdBannerView(unitId: AdUnitID) -> GADBannerView? {
-        if let bannerLoaded = listAd[unitId.rawValue] {
+        if let bannerLoaded = listBannerCachedAd[unitId.rawValue] {
             let timeLoaded = bannerLoaded?.timeLoaded
             let timeDistance = Date().timeIntervalSince1970 - (timeLoaded?.timeIntervalSince1970 ?? 0)
             if (timeDistance / 1000) > timeReloadBanner {
@@ -168,7 +168,7 @@ extension BannerLoader: GADBannerViewDelegate {
         bannerView.superview?.hideSkeleton()
         let bannerLoaded = BannerLoaded(timeLoaded: Date(),
                                         bannerView: bannerView)
-        listAd[adUnitID] = bannerLoaded
+        listBannerCachedAd[adUnitID] = bannerLoaded
         listLoadingAd.removeAll { $0 == adUnitID }
         listDelegate[adUnitID]?(adUnitID, true)
         listDelegate.removeValue(forKey: adUnitID)
@@ -188,8 +188,8 @@ extension BannerLoader: GADBannerViewDelegate {
     
     public func bannerViewWillDismissScreen(_ bannerView: GADBannerView) {
         if let adUnitID = bannerView.adUnitID {
-            self.listAd.removeValue(forKey: adUnitID)
-            self.listAd[adUnitID] = nil
+            self.listBannerCachedAd.removeValue(forKey: adUnitID)
+            self.listBannerCachedAd[adUnitID] = nil
         }
     }
     

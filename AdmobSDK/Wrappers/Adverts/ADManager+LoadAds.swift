@@ -161,7 +161,9 @@ extension ADManager {
         }
         self.isShowingAd = true
         BBLLogging.d("ADMANAGER: FULL Loading")
-        AdMobManager.shared.showIntertitial(unitId: adId, isSplash: isSplash, blockDidDismiss: { [weak self] in
+        AdMobManager.shared.showIntertitial(unitId: adId, isSplash: isSplash, blockWillDismiss: {
+            completion?(.showed)
+        }, blockDidDismiss: { [weak self] in
             BBLLogging.d("ADMANAGER: FULL Showed and closed")
             AdMobManager.shared.blockFullScreenAdFailed = nil
             self?.isShowingAd = false
@@ -191,7 +193,7 @@ extension ADManager {
             adId = SampleAdUnitID.adFormatRewarded
         }
         BBLLogging.d("ADMANAGER: REWARD \(adId)")
-        guard               id.isEnableAd else {
+        guard id.isEnableAd else {
             BBLLogging.d("ADMANAGER: REWARD REMOTE CLOSE")
             completion?(.closed)
             return
@@ -319,7 +321,7 @@ extension ADManager {
     public func loadNative(_ id: AdConfigId,
                            to view: UIView,
                            refreshAd: Bool = false,
-                           nativeAdType: NativeAdType = .smallMedia,
+                           nativeAdType: NativeAdType,
                            ratio: GADMediaAspectRatio = .landscape,
                            _ completion: @escaping ((_ adId: String,
                                                      _ success: Bool,
@@ -356,6 +358,37 @@ extension ADManager {
         }
         AdMobManager.shared.addAdNative(unitId: adId,
                                         view: view,
+                                        refreshAd: refreshAd,
+                                        type: nativeAdType,
+                                        ratio: ratio)
+    }
+    
+    public func loadNativeWithoutView(_ id: AdConfigId,
+                           refreshAd: Bool = false,
+                           nativeAdType: NativeAdType,
+                           ratio: GADMediaAspectRatio = .landscape,
+                           _ completion: @escaping ((_ adId: String,
+                                                     _ success: Bool,
+                                                     _ nativeAdView: NativeAdProtocol?) -> Void)) {
+        var adId = id.adUnitId
+        if isTestMode {
+            adId = SampleAdUnitID.adFormatNativeAdvancedVideo
+        }
+        guard id.isEnableAd else {
+            completion(id.adId, false, nil)
+            return
+        }
+        AdMobManager.shared.blockNativeFailed = { adId in
+            BBLLogging.d("ADMANAGER: NATIVE LOAD FAILED: \(adId)")
+            completion(adId, false, nil)
+        }
+        AdMobManager.shared.blockLoadNativeSuccess = { idRequested, nativeAdView in
+            BBLLogging.d("ADMANAGER: NATIVE LOAD SUCCESS: \(idRequested ?? "")")
+            if idRequested?.elementsEqual(adId.rawValue) == true {
+                completion(idRequested ?? "", true, nativeAdView)
+            }
+        }
+        AdMobManager.shared.addAdNativeWithoutView(unitId: adId,
                                         refreshAd: refreshAd,
                                         type: nativeAdType,
                                         ratio: ratio)

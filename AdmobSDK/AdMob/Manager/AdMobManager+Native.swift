@@ -24,7 +24,7 @@ extension NativeAdProtocol {
         adUnitID = value
     }
     
-    mutating func reloadAdContent() {
+    public mutating func reloadAdContent() {
         guard let adNative = gadNativeAd else { return }
         bindingData(nativeAd: adNative)
     }
@@ -87,7 +87,7 @@ extension AdMobManager {
     }
     
     private func createAdNativeView(unitId: AdUnitID,
-                                    type: NativeAdType = .small,
+                                    type: NativeAdType,
                                     view: UIView? = nil
     ) {
         if let _ = getAdNative(unitId: unitId.rawValue) {
@@ -129,7 +129,7 @@ extension AdMobManager {
     
     internal func preloadAdNative(unitId: AdUnitID,
                                   refreshAd: Bool = false,
-                                  type: NativeAdType = .smallMedia,
+                                  type: NativeAdType,
                                   ratio: GADMediaAspectRatio = .portrait) {
         if let loader = getNativeAdLoader(unitId: unitId),
            loader.isLoading {
@@ -152,7 +152,7 @@ extension AdMobManager {
     internal func addAdNative(unitId: AdUnitID,
                               view: UIView? = nil,
                               refreshAd: Bool = false,
-                              type: NativeAdType = .smallMedia,
+                              type: NativeAdType,
                               ratio: GADMediaAspectRatio) {
         if let loader = getNativeAdLoader(unitId: unitId),
            loader.isLoading { return }
@@ -170,6 +170,30 @@ extension AdMobManager {
                 blockLoadNativeSuccess?(unitId.rawValue, nativeAdProtocol)
             } else {
                 addAdNative(unitId: unitId, view: view, refreshAd: true, type: type, ratio: ratio)
+            }
+        }
+    }
+    
+    internal func addAdNativeWithoutView(unitId: AdUnitID,
+                              refreshAd: Bool = false,
+                              type: NativeAdType,
+                              ratio: GADMediaAspectRatio) {
+        if let loader = getNativeAdLoader(unitId: unitId),
+           loader.isLoading { return }
+        guard let rootVC = UIApplication.getTopViewController() else {
+            blockNativeFailed?(unitId.rawValue)
+            return
+        }
+        if refreshAd {
+            removeNativeAd(unitId: unitId.rawValue)
+            createAdNativeView(unitId: unitId, type: type)
+            loadAdNative(unitId: unitId, rootVC: rootVC, numberOfAds: 1, ratio: ratio)
+        } else {
+            if var nativeAdProtocol = getAdNative(unitId: unitId.rawValue) {
+                nativeAdProtocol.reloadAdContent()
+                blockLoadNativeSuccess?(unitId.rawValue, nativeAdProtocol)
+            } else {
+                addAdNativeWithoutView(unitId: unitId, refreshAd: true, type: type, ratio: ratio)
             }
         }
     }
