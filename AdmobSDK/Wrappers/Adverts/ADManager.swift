@@ -124,11 +124,14 @@ public class ADManager: NSObject {
         #if canImport(AppLovinSDK)
         if !applovinKey.isEmpty {
             self.appLovinKey = applovinKey
-            let appLovinSetting = ALSdkInitializationConfiguration(sdkKey: applovinKey)
-            ALSdk.shared().initialize(with: appLovinSetting,
-                                      completionHandler: { config in
-                print("APLV: config - \(config)")
-            })
+            DispatchQueue.global(qos: .background).async {
+                let appLovinSetting = ALSdkInitializationConfiguration(sdkKey: applovinKey)
+                ALSdk.shared().initialize(with: appLovinSetting,
+                                          completionHandler: { config in
+                    debugPrint("APLV: config - \(config)")
+                })
+            }
+            BBLLogging.d("APLV: config initialing")
         }
         #endif
     }
@@ -153,6 +156,7 @@ public class ADManager: NSObject {
         } else {
             self.initialAdverts()
         }
+        BBLLogging.d("ADMANAGER: Init finished \(enable)")
         completion(true)
     }
     
