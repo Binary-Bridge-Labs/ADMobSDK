@@ -81,6 +81,7 @@ public class ADManager: NSObject {
     
     internal var showState: AdShowState?
     internal var configTime: AdConfigTime?
+    private var appLovinKey = ""
     
     override init() {
         super.init()
@@ -96,17 +97,7 @@ public class ADManager: NSObject {
     
     public func startAds(style: ThemeStyleAds = ThemeStyleAds.origin,
                   testIds: [String] = []) {
-        
-        #if canImport(AppLovinSDK)
-        if let aplvinKey = Bundle.main.object(forInfoDictionaryKey: "applovin_key") as? String, !aplvinKey.isEmpty {
-            let appLovinSetting = ALSdkInitializationConfiguration(sdkKey: aplvinKey)
-            ALSdk.shared().initialize(with: appLovinSetting,
-                                      completionHandler: { config in
-                print("APLV: config - \(config)")
-            })
-        }
-        #endif
-        
+       
         if !testIds.isEmpty {
             GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers = testIds
         }
@@ -114,6 +105,32 @@ public class ADManager: NSObject {
         DispatchQueue.main.asyncSafety {
             GADMobileAds.sharedInstance().start()
         }
+    }
+    
+    public func startApplovin(key: String = "") {
+        var applovinKey = key
+        if applovinKey.isEmpty {
+            applovinKey = (Bundle.main.object(forInfoDictionaryKey: "applovin_key") as? String) ?? ""
+            if applovinKey.isEmpty {
+                print("Couldn't found `applovin_key` from `Info.plist` file.")
+            }
+        }
+        if applovinKey.isEmpty {
+            applovinKey = RemoteConfigManager.shared.getValue(by: DefaultRemoteKey.appLovinKey)?.stringValue ?? ""
+            if applovinKey.isEmpty {
+                print("Couldn't found `appLovinKey` from Remote config.")
+            }
+        }
+        #if canImport(AppLovinSDK)
+        if !applovinKey.isEmpty {
+            self.appLovinKey = applovinKey
+            let appLovinSetting = ALSdkInitializationConfiguration(sdkKey: applovinKey)
+            ALSdk.shared().initialize(with: appLovinSetting,
+                                      completionHandler: { config in
+                print("APLV: config - \(config)")
+            })
+        }
+        #endif
     }
     
     public func disableAds() {
@@ -130,7 +147,7 @@ public class ADManager: NSObject {
                     completion: @escaping ((_ success: Bool) -> Void)) {
         
         BBLLogging.d("ADMANAGER: \(enable)")
-        
+        self.startApplovin(key: self.appLovinKey)
         if !enable {
             self.loadDefaults()
         } else {

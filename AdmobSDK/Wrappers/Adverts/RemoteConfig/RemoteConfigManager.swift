@@ -25,6 +25,7 @@ public enum DefaultRemoteKey: String, KeyRemote {
     // Adverts
     case stateShowAds = "state_show_ads"
     case timeRemoteShowAd = "time_remote_show_ads"
+    case appLovinKey = "appLovinKey"
     
     public var key: String { return rawValue }
 }
