@@ -38,14 +38,21 @@ class BannerLoader: NSObject {
         return nil
     }
     
-    public func createAdBannerIfNeed(unitId: AdUnitID) -> (isNew: Bool, view: GADBannerView) {
+    public func createAdBannerIfNeed(unitId: AdUnitID,
+                                     type: AdFormatType) -> (isNew: Bool, view: GADBannerView) {
         if let adBannerView = self.getAdBannerView(unitId: unitId) {
             return (isNew: false, view: adBannerView)
         }
         let adBannerView = GADBannerView()
         adBannerView.adUnitID = unitId.rawValue
         adBannerView.paidEventHandler = { value in
-            self.trackAdRevenue(value: value, unitId: adBannerView.adUnitID ?? "")
+            if let adNetworkName = adBannerView.responseInfo?.adNetworkInfoArray.first?.adNetworkClassName {
+                print("Ad Network Name: \(adNetworkName)")
+                AdMobManager.shared.trackAdRevenue(format: type,
+                                                   value: value,
+                                                   unitId: adBannerView.adUnitID ?? "",
+                                                   adNetwork: adNetworkName)
+            }
         }
         adBannerView.delegate = self
         return (isNew: true, view: adBannerView)
@@ -60,7 +67,8 @@ class BannerLoader: NSObject {
         listDelegate[unitId.rawValue] = completion
         listDelegateBannerClick[unitId.rawValue] = clickBanner
         if listLoadingAd.contains(where: { $0 == unitId.rawValue }) { return}
-        let (isNew, adBannerView) = self.createAdBannerIfNeed(unitId: unitId)
+        let (isNew, adBannerView) = self.createAdBannerIfNeed(unitId: unitId,
+                                                              type: .banner)
         adBannerView.removeFromSuperview()
         adBannerView.rootViewController = rootVC
         view.addSubview(adBannerView)
@@ -92,7 +100,8 @@ class BannerLoader: NSObject {
         listDelegate[unitId.rawValue] = completion
         listDelegateBannerClick[unitId.rawValue] = clickBanner
         if listLoadingAd.contains(where: { $0 == unitId.rawValue }) { return}
-        let (isNew, adBannerView) = self.createAdBannerIfNeed(unitId: unitId)
+        let (isNew, adBannerView) = self.createAdBannerIfNeed(unitId: unitId,
+                                                              type: .collapsible)
         adBannerView.removeFromSuperview()
         adBannerView.rootViewController = rootVC
         view.addSubview(adBannerView)
@@ -130,7 +139,8 @@ class BannerLoader: NSObject {
         listDelegate[unitId.rawValue] = completion
         listDelegateBannerClick[unitId.rawValue] = clickBanner
         if listLoadingAd.contains(where: { $0 == unitId.rawValue }) { return}
-        let (isNew, adBannerView) = self.createAdBannerIfNeed(unitId: unitId)
+        let (isNew, adBannerView) = self.createAdBannerIfNeed(unitId: unitId,
+                                                              type: .adaptive)
         adBannerView.removeFromSuperview()
         adBannerView.rootViewController = rootVC
         view.addSubview(adBannerView)
@@ -205,15 +215,6 @@ extension BannerLoader: GADBannerViewDelegate {
             listDelegateBannerClick[adUnitID]?(adUnitID)
         }
         AdMobManager.shared.logEvenClick(id: bannerView.adUnitID ?? "")
-    }
-    
-    //    MARK: - Track Ad Revenue
-    func trackAdRevenue(value: GADAdValue, unitId: String) {
-        Analytics.logEvent("paid_ad_impression_value", parameters: ["adunitid" : unitId, "value" : "\(value.value.doubleValue)"])
-    }
-    
-    func logEvenClick(id: String) {
-        Analytics.logEvent("user_click_ads", parameters: ["adunitid" : id])
     }
     
 }

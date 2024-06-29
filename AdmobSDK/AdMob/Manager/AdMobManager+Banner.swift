@@ -20,14 +20,21 @@ extension AdMobManager: GADBannerViewDelegate {
         return nil
     }
     
-    public func createAdBannerIfNeed(unitId: AdUnitID) -> GADBannerView {
+    public func createAdBannerIfNeed(unitId: AdUnitID, 
+                                     type: AdFormatType) -> GADBannerView {
         if let adBannerView = self.getAdBannerView(unitId: unitId) {
             return adBannerView
         }
         let adBannerView = GADBannerView()
         adBannerView.adUnitID = unitId.rawValue
         adBannerView.paidEventHandler = { value in
-            self.trackAdRevenue(value: value, unitId: adBannerView.adUnitID ?? "")
+            if let adNetworkName = adBannerView.responseInfo?.adNetworkInfoArray.first?.adNetworkClassName {
+                print("Ad Network Name: \(adNetworkName)")
+                AdMobManager.shared.trackAdRevenue(format: type,
+                                                   value: value,
+                                                   unitId: adBannerView.adUnitID ?? "",
+                                                   adNetwork: adNetworkName)
+            }
         }
         listAd.setObject(adBannerView, forKey: unitId.rawValue as NSCopying)
         return adBannerView
@@ -35,7 +42,7 @@ extension AdMobManager: GADBannerViewDelegate {
     
     // quảng cáo xác định kích thước
     public func addAdBanner(unitId: AdUnitID, rootVC: UIViewController, view: UIView) {
-        let adBannerView = self.createAdBannerIfNeed(unitId: unitId)
+        let adBannerView = self.createAdBannerIfNeed(unitId: unitId, type: .banner)
         adBannerView.rootViewController = rootVC
         view.addSubview(adBannerView)
         view.layer.borderWidth = 0.5
@@ -55,7 +62,7 @@ extension AdMobManager: GADBannerViewDelegate {
     
     // Quảng cáo Collapsible đặt ở bottom, lần đầu sẽ mở rộng
     public func addAdCollapsibleBannerAdaptive(unitId: AdUnitID, rootVC: UIViewController, view: UIView, isCollapsibleBanner: Bool = false) {
-        let adBannerView = self.createAdBannerIfNeed(unitId: unitId)
+        let adBannerView = self.createAdBannerIfNeed(unitId: unitId, type: .collapsible)
         adBannerView.rootViewController = rootVC
         view.addSubview(adBannerView)
         view.layer.borderWidth = 0.5
@@ -82,7 +89,7 @@ extension AdMobManager: GADBannerViewDelegate {
     
     // quảng có thích ứng với chiều cao không cố định
     public func addAdBannerAdaptive(unitId: AdUnitID, rootVC: UIViewController, view: UIView) {
-        let adBannerView = self.createAdBannerIfNeed(unitId: unitId)
+        let adBannerView = self.createAdBannerIfNeed(unitId: unitId, type: .adaptive)
         adBannerView.rootViewController = rootVC
         view.addSubview(adBannerView)
         view.layer.borderWidth = 0.5

@@ -116,8 +116,17 @@ open class AdMobManager: NSObject {
     }
     
     //    MARK: - Track Ad Revenue
-    func trackAdRevenue(value: GADAdValue, unitId: String) {
-        Analytics.logEvent("paid_ad_impression_value", parameters: ["adunitid" : unitId, "value" : "\(value.value.doubleValue)"])
+    func trackAdRevenue(format: AdFormatType,
+                        value: GADAdValue,
+                        unitId: String,
+                        adNetwork: String) {
+        Analytics.logEvent("ad_revenue_sdk",
+                           parameters: ["ad_format": format.rawValue,
+                                        "value": "\(value.value.doubleValue)",
+                                        "currency": value.currencyCode,
+                                        "placement": unitId,
+                                        "precison": "\(String(describing: value.precision.self))",
+                                        "ad_network": adNetwork])
         if let adRevenue = ADJAdRevenue(source: ADJAdRevenueSourceAdMob) {
             adRevenue.setRevenue(value.value.doubleValue, currency: value.currencyCode)
             Adjust.trackAdRevenue(adRevenue)
@@ -128,4 +137,14 @@ open class AdMobManager: NSObject {
         Analytics.logEvent("user_click_ads", parameters: ["adunitid" : id])
     }
     
+}
+
+public enum AdFormatType: String {
+    case banner = "banner"
+    case adaptive = "adaptive"
+    case inter = "inter"
+    case reward = "reward"
+    case appOpen = "app_open"
+    case native = "native"
+    case collapsible = "collapsible"
 }

@@ -32,7 +32,7 @@ public enum IAPState: String {
                 UserDefaults.standard.setValue(newValue.rawValue, forKey: keyIAPState)
                 print("--> send didPaymentSuccess")
                 InappManager.share.didPaymentSuccess.onNext(newValue)
-               
+                
             }
         }
     }
@@ -192,7 +192,7 @@ public class InappManager: NSObject {
     }
     
     public func productInfo(id: Set<String>, isShowLoading: Bool = true,
-                     completed: @escaping(Set<SKProduct>) -> () = {_ in}) -> InAppRequest {
+                            completed: @escaping(Set<SKProduct>) -> () = {_ in}) -> InAppRequest {
         if isShowLoading {
             LoadingProgressHUD.show()
         }
@@ -244,9 +244,19 @@ public class InappManager: NSObject {
                 switch purchaseResult {
                 case .purchased( let expireddate, let items):
                     print("==> purchased expireddate \(expireddate)")
-                    IAPState.iapState = .purchased
                     self.infoPurchaseProduct = items.first
                     self.purchasedProduct = items.first?.productId
+                    if let productId = self.purchasedProduct {
+                        if let firstProduct = self.listProduct.first(where: { item in
+                            item.productIdentifier == productId
+                        }) {
+                            logCostAnalytic(value: firstProduct.price.doubleValue,
+                                            currency: firstProduct.priceLocale.currencySymbol,
+                                            productId: productId,
+                                            renew: true)
+                        }
+                    }
+                    IAPState.iapState = .purchased
                 case .expired(let expireddate,_):
                     print("==> expireddate \(expireddate)")
                     IAPState.iapState = .expired
@@ -304,7 +314,7 @@ extension InappManager: SKPaymentTransactionObserver {
     
     func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         if needShowRestoreError {
-//            AppRouter.shared.rootViewController?.createToast(type: .error, title: error.localizedDescription)
+            //            AppRouter.shared.rootViewController?.createToast(type: .error, title: error.localizedDescription)
         }
         LoadingProgressHUD.dismiss()
     }
@@ -321,8 +331,18 @@ extension InappManager: SKPaymentTransactionObserver {
                 case .purchased( _, let items):
                     self.infoPurchaseProduct = items.first
                     self.purchasedProduct = items.first?.productId
+                    if let productId = self.purchasedProduct {
+                        if let firstProduct = self.listProduct.first(where: { item in
+                            item.productIdentifier == productId
+                        }) {
+                            logCostAnalytic(value: firstProduct.price.doubleValue,
+                                            currency: firstProduct.priceLocale.currencySymbol,
+                                            productId: productId,
+                                            renew: true)
+                        }
+                    }
                     IAPState.iapState = .purchased
-                    self.delegate?.purchaseSuccess(id: "")
+                    self.delegate?.purchaseSuccess(id: self.purchasedProduct ?? "")
                 case .expired(_,_):
                     IAPState.iapState = .expired
                 case .notPurchased:
@@ -336,6 +356,15 @@ extension InappManager: SKPaymentTransactionObserver {
         for transaction in queue.transactions {
             SKPaymentQueue.default().finishTransaction(transaction as SKPaymentTransaction)
         }
+    }
+    
+    private func logCostAnalytic(value: Double, currency: String?, productId: String, renew: Bool) {
+        FirebaseEventManager.logEvent(with: "iap_sdk",
+                                      params: ["value" : "\(value)",
+                                               "currency" : "\(currency ?? "")",
+                                               "product_id" : productId,
+                                               "renew" : "\(renew)"
+                                              ])
     }
 }
 

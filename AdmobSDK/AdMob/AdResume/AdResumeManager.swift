@@ -114,7 +114,13 @@ open class AdResumeManager: NSObject {
             }
             
             ad.paidEventHandler = { [weak self] value in
-                AdMobManager.shared.trackAdRevenue(value: value, unitId: self?.resumeAdId?.rawValue ?? "")
+                if let adNetworkName = ad.responseInfo.adNetworkInfoArray.first?.adNetworkClassName {
+                    print("Ad Network Name: \(adNetworkName)")
+                    AdMobManager.shared.trackAdRevenue(format: .appOpen,
+                                                       value: value,
+                                                       unitId: self?.resumeAdId?.rawValue ?? "",
+                                                       adNetwork: adNetworkName)
+                }
             }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {

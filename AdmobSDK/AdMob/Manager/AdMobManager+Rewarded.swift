@@ -49,7 +49,13 @@ extension AdMobManager {
             }
             ad.fullScreenContentDelegate = self
             ad.paidEventHandler = { value in
-                self?.trackAdRevenue(value: value, unitId: ad.adUnitID)
+                if let adNetworkName = ad.responseInfo.adNetworkInfoArray.first?.adNetworkClassName {
+                    print("Ad Network Name: \(adNetworkName)")
+                    AdMobManager.shared.trackAdRevenue(format: .reward,
+                                                       value: value,
+                                                       unitId: ad.adUnitID,
+                                                       adNetwork: adNetworkName)
+                }
             }
             self?.listAd.setObject(ad, forKey: unitId.rawValue as NSCopying)
             self?.blockLoadFullScreenAdSuccess?(unitId.rawValue)

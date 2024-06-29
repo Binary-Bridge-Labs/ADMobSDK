@@ -252,7 +252,13 @@ extension AdMobManager: GADNativeAdLoaderDelegate {
     public func adLoader(_ adLoader: GADAdLoader, didReceive nativeAd: GADNativeAd) {
         nativeAd.delegate = self
         nativeAd.paidEventHandler = { value in
-            self.trackAdRevenue(value: value, unitId: adLoader.adUnitID)
+            if let adNetworkName = nativeAd.responseInfo.adNetworkInfoArray.first?.adNetworkClassName {
+                print("Ad Network Name: \(adNetworkName)")
+                AdMobManager.shared.trackAdRevenue(format: .native,
+                                                   value: value,
+                                                   unitId: adLoader.adUnitID,
+                                                   adNetwork: adNetworkName)
+            }
         }
         guard var nativeAdView = self.getAdNative(unitId: adLoader.adUnitID) else {return}
         nativeAd.mediaContent.videoController.delegate = self
